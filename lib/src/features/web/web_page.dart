@@ -27,18 +27,22 @@ class _WebPageState extends State<WebPage> {
         ..setJavaScriptMode(JavaScriptMode.unrestricted)
         ..setNavigationDelegate(NavigationDelegate(
           onProgress: (value) {
-            if (mounted) setState(() => _progress = value);
+            if (mounted) {
+              setState(() => _progress = value);
+            }
           },
           onPageStarted: (url) {
-            if (mounted)
+            if (mounted) {
               setState(() {
                 _address.text = url;
                 _error = null;
               });
+            }
           },
           onWebResourceError: (error) {
-            if (error.isForMainFrame == true && mounted)
+            if (error.isForMainFrame == true && mounted) {
               setState(() => _error = error.description);
+            }
           },
           onNavigationRequest: (request) {
             final scheme = Uri.tryParse(request.url)?.scheme;
@@ -59,8 +63,9 @@ class _WebPageState extends State<WebPage> {
   }
 
   void _message(String text) {
-    if (mounted)
+    if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(text)));
+    }
   }
 
   Uri? _uri(String text) {
@@ -186,8 +191,9 @@ class _WebPageState extends State<WebPage> {
                           onPressed: _web == null
                               ? null
                               : () async {
-                                  if (await _web!.canGoBack())
+                                  if (await _web!.canGoBack()) {
                                     await _web!.goBack();
+                                  }
                                 },
                           icon: const Icon(Icons.arrow_back)),
                       IconButton(
@@ -195,8 +201,9 @@ class _WebPageState extends State<WebPage> {
                           onPressed: _web == null
                               ? null
                               : () async {
-                                  if (await _web!.canGoForward())
+                                  if (await _web!.canGoForward()) {
                                     await _web!.goForward();
+                                  }
                                 },
                           icon: const Icon(Icons.arrow_forward)),
                       IconButton(
