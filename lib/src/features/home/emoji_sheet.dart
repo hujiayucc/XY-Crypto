@@ -54,12 +54,13 @@ class _OriginalEmojiSheetState extends State<OriginalEmojiSheet> {
   void initState() {
     super.initState();
     _categories = PageController();
-    _itemsByCategory = widget.categories ?? [
-      EmojiCategory(label: '原生 Emoji', items: widget.entries),
-      EmojiCategory(label: 'QQ', items: qqSmileyCatalog),
-      EmojiCategory(label: '滑稽', items: huajiSmileyCatalog),
-      EmojiCategory(label: 'Doge', items: dogeSmileyCatalog),
-    ];
+    _itemsByCategory = widget.categories ??
+        [
+          EmojiCategory(label: '原生 Emoji', items: widget.entries),
+          EmojiCategory(label: 'QQ', items: qqSmileyCatalog),
+          EmojiCategory(label: '滑稽', items: huajiSmileyCatalog),
+          EmojiCategory(label: 'Doge', items: dogeSmileyCatalog),
+        ];
   }
 
   @override
@@ -121,7 +122,8 @@ class _OriginalEmojiSheetState extends State<OriginalEmojiSheet> {
                     right: 0,
                     child: IconButton(
                       tooltip: '删除',
-                      onPressed: () => _select(const EmojiPanelSelection.delete()),
+                      onPressed: () =>
+                          _select(const EmojiPanelSelection.delete()),
                       icon: const Icon(Icons.backspace_outlined),
                     ),
                   ),
@@ -143,7 +145,8 @@ class _OriginalEmojiSheetState extends State<OriginalEmojiSheet> {
     }
   }
 
-  Widget _categoryGrid(BuildContext context, EmojiCategory category) => GridView.builder(
+  Widget _categoryGrid(BuildContext context, EmojiCategory category) =>
+      GridView.builder(
         key: PageStorageKey<String>(category.label),
         padding: const EdgeInsets.fromLTRB(8, 8, 8, 2),
         gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(

@@ -26,14 +26,38 @@ class Sm4Engine implements pc.BlockCipher {
   );
   static const _fk = <int>[0xa3b1bac6, 0x56aa3350, 0x677d9197, 0xb27022dc];
   static const _ck = <int>[
-    0x00070e15, 0x1c232a31, 0x383f464d, 0x545b6269,
-    0x70777e85, 0x8c939aa1, 0xa8afb6bd, 0xc4cbd2d9,
-    0xe0e7eef5, 0xfc030a11, 0x181f262d, 0x343b4249,
-    0x50575e65, 0x6c737a81, 0x888f969d, 0xa4abb2b9,
-    0xc0c7ced5, 0xdce3eaf1, 0xf8ff060d, 0x141b2229,
-    0x30373e45, 0x4c535a61, 0x686f767d, 0x848b9299,
-    0xa0a7aeb5, 0xbcc3cad1, 0xd8dfe6ed, 0xf4fb0209,
-    0x10171e25, 0x2c333a41, 0x484f565d, 0x646b7279,
+    0x00070e15,
+    0x1c232a31,
+    0x383f464d,
+    0x545b6269,
+    0x70777e85,
+    0x8c939aa1,
+    0xa8afb6bd,
+    0xc4cbd2d9,
+    0xe0e7eef5,
+    0xfc030a11,
+    0x181f262d,
+    0x343b4249,
+    0x50575e65,
+    0x6c737a81,
+    0x888f969d,
+    0xa4abb2b9,
+    0xc0c7ced5,
+    0xdce3eaf1,
+    0xf8ff060d,
+    0x141b2229,
+    0x30373e45,
+    0x4c535a61,
+    0x686f767d,
+    0x848b9299,
+    0xa0a7aeb5,
+    0xbcc3cad1,
+    0xd8dfe6ed,
+    0xf4fb0209,
+    0x10171e25,
+    0x2c333a41,
+    0x484f565d,
+    0x646b7279,
   ];
 
   late Uint32List _encryptKeys;
@@ -61,8 +85,8 @@ class Sm4Engine implements pc.BlockCipher {
     }
     for (var i = 0; i < 32; i++) {
       words[i + 4] = (words[i] ^
-              _linearKey(_substitute(words[i + 1] ^ words[i + 2] ^
-                  words[i + 3] ^ _ck[i]))) &
+              _linearKey(_substitute(
+                  words[i + 1] ^ words[i + 2] ^ words[i + 3] ^ _ck[i]))) &
           _mask;
       _encryptKeys[i] = words[i + 4];
       _decryptKeys[31 - i] = words[i + 4];
@@ -84,8 +108,8 @@ class Sm4Engine implements pc.BlockCipher {
   }
 
   @override
-  int processBlock(Uint8List input, int inputOffset, Uint8List output,
-      int outputOffset) {
+  int processBlock(
+      Uint8List input, int inputOffset, Uint8List output, int outputOffset) {
     if (!_initialized) throw StateError('SM4 is not initialized');
     if (inputOffset < 0 || inputOffset + blockSize > input.length) {
       throw ArgumentError('SM4 input buffer is too short');
@@ -100,8 +124,8 @@ class Sm4Engine implements pc.BlockCipher {
     final keys = _forEncryption ? _encryptKeys : _decryptKeys;
     for (var i = 0; i < 32; i++) {
       x[i + 4] = (x[i] ^
-              _linearData(_substitute(x[i + 1] ^ x[i + 2] ^
-                  x[i + 3] ^ keys[i]))) &
+              _linearData(
+                  _substitute(x[i + 1] ^ x[i + 2] ^ x[i + 3] ^ keys[i]))) &
           _mask;
     }
     _writeWord(x[35], output, outputOffset);

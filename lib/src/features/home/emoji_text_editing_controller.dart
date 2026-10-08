@@ -9,7 +9,8 @@ import 'smiley_catalog.dart';
 class EmojiTextEditingController extends TextEditingController {
   EmojiTextEditingController({super.text})
       : _assets = {
-          for (final emoji in originalEmojiCatalog) emoji.codePoint: emoji.asset,
+          for (final emoji in originalEmojiCatalog)
+            emoji.codePoint: emoji.asset,
         };
 
   final Map<int, String> _assets;
@@ -28,8 +29,8 @@ class EmojiTextEditingController extends TextEditingController {
 
     final children = <InlineSpan>[];
     final plain = StringBuffer();
-    final fontSize = style?.fontSize ??
-        DefaultTextStyle.of(context).style.fontSize ?? 14;
+    final fontSize =
+        style?.fontSize ?? DefaultTextStyle.of(context).style.fontSize ?? 14;
     final emojiSize = fontSize + 10;
     void flushPlain() {
       if (plain.isEmpty) return;
@@ -40,8 +41,7 @@ class EmojiTextEditingController extends TextEditingController {
     for (var offset = 0; offset < valueText.length;) {
       final firstUnit = valueText.codeUnitAt(offset);
       final isHighSurrogate = firstUnit >= 0xD800 && firstUnit <= 0xDBFF;
-      final hasLowSurrogate =
-          offset + 1 < valueText.length &&
+      final hasLowSurrogate = offset + 1 < valueText.length &&
           valueText.codeUnitAt(offset + 1) >= 0xDC00 &&
           valueText.codeUnitAt(offset + 1) <= 0xDFFF;
       final unitLength = isHighSurrogate && hasLowSurrogate ? 2 : 1;
@@ -56,9 +56,8 @@ class EmojiTextEditingController extends TextEditingController {
         orElse: () => const MapEntry('', ''),
       );
       final asset = smiley.key.isNotEmpty ? smiley.value : _assets[rune];
-      final consumedLength = smiley.key.isNotEmpty
-          ? smiley.key.length
-          : unitLength;
+      final consumedLength =
+          smiley.key.isNotEmpty ? smiley.key.length : unitLength;
       final renderedText = smiley.key.isNotEmpty ? smiley.key : codeUnits;
       if (asset == null) {
         plain.write(renderedText);
