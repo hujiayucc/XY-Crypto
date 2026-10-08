@@ -1,0 +1,1058 @@
+[
+  {
+    "index": 0,
+    "codePoint": 128515,
+    "resourceName": "u1f603",
+    "sourcePath": "res/QU.png",
+    "config": "xhdpi",
+    "asset": "assets/emoji/emoji_000.png"
+  },
+  {
+    "index": 1,
+    "codePoint": 128512,
+    "resourceName": "u1f600",
+    "sourcePath": "res/S6.png",
+    "config": "xhdpi",
+    "asset": "assets/emoji/emoji_001.png"
+  },
+  {
+    "index": 2,
+    "codePoint": 128522,
+    "resourceName": "u1f60a",
+    "sourcePath": "res/Qu.png",
+    "config": "xhdpi",
+    "asset": "assets/emoji/emoji_002.png"
+  },
+  {
+    "index": 3,
+    "codePoint": 9786,
+    "resourceName": "u263a",
+    "sourcePath": "res/dV.png",
+    "config": "xhdpi",
+    "asset": "assets/emoji/emoji_003.png"
+  },
+  {
+    "index": 4,
+    "codePoint": 128521,
+    "resourceName": "u1f609",
+    "sourcePath": "res/l0.png",
+    "config": "xhdpi",
+    "asset": "assets/emoji/emoji_004.png"
+  },
+  {
+    "index": 5,
+    "codePoint": 128525,
+    "resourceName": "u1f60d",
+    "sourcePath": "res/c2.png",
+    "config": "xhdpi",
+    "asset": "assets/emoji/emoji_005.png"
+  },
+  {
+    "index": 6,
+    "codePoint": 128536,
+    "resourceName": "u1f618",
+    "sourcePath": "res/jR.png",
+    "config": "xhdpi",
+    "asset": "assets/emoji/emoji_006.png"
+  },
+  {
+    "index": 7,
+    "codePoint": 128538,
+    "resourceName": "u1f61a",
+    "sourcePath": "res/BL.png",
+    "config": "xhdpi",
+    "asset": "assets/emoji/emoji_007.png"
+  },
+  {
+    "index": 8,
+    "codePoint": 128540,
+    "resourceName": "u1f61c",
+    "sourcePath": "res/iv.png",
+    "config": "xhdpi",
+    "asset": "assets/emoji/emoji_008.png"
+  },
+  {
+    "index": 9,
+    "codePoint": 128541,
+    "resourceName": "u1f61d",
+    "sourcePath": "res/SP.png",
+    "config": "xhdpi",
+    "asset": "assets/emoji/emoji_009.png"
+  },
+  {
+    "index": 10,
+    "codePoint": 128563,
+    "resourceName": "u1f633",
+    "sourcePath": "res/Ai.png",
+    "config": "xhdpi",
+    "asset": "assets/emoji/emoji_010.png"
+  },
+  {
+    "index": 11,
+    "codePoint": 128513,
+    "resourceName": "u1f601",
+    "sourcePath": "res/jF.png",
+    "config": "xhdpi",
+    "asset": "assets/emoji/emoji_011.png"
+  },
+  {
+    "index": 12,
+    "codePoint": 128532,
+    "resourceName": "u1f614",
+    "sourcePath": "res/k9.png",
+    "config": "xhdpi",
+    "asset": "assets/emoji/emoji_012.png"
+  },
+  {
+    "index": 13,
+    "codePoint": 128524,
+    "resourceName": "u1f60c",
+    "sourcePath": "res/or.png",
+    "config": "xhdpi",
+    "asset": "assets/emoji/emoji_013.png"
+  },
+  {
+    "index": 14,
+    "codePoint": 130834,
+    "resourceName": "u1f12",
+    "sourcePath": "res/53.png",
+    "config": "xhdpi",
+    "asset": "assets/emoji/emoji_014.png"
+  },
+  {
+    "index": 15,
+    "codePoint": 128543,
+    "resourceName": "u1f61f",
+    "sourcePath": "res/46.png",
+    "config": "xhdpi",
+    "asset": "assets/emoji/emoji_015.png"
+  },
+  {
+    "index": 16,
+    "codePoint": 128542,
+    "resourceName": "u1f61e",
+    "sourcePath": "res/cx.png",
+    "config": "xhdpi",
+    "asset": "assets/emoji/emoji_016.png"
+  },
+  {
+    "index": 17,
+    "codePoint": 128547,
+    "resourceName": "u1f623",
+    "sourcePath": "res/Qe.png",
+    "config": "xhdpi",
+    "asset": "assets/emoji/emoji_017.png"
+  },
+  {
+    "index": 18,
+    "codePoint": 128546,
+    "resourceName": "u1f622",
+    "sourcePath": "res/-O.png",
+    "config": "xhdpi",
+    "asset": "assets/emoji/emoji_018.png"
+  },
+  {
+    "index": 19,
+    "codePoint": 128514,
+    "resourceName": "u1f602",
+    "sourcePath": "res/lf.png",
+    "config": "xhdpi",
+    "asset": "assets/emoji/emoji_019.png"
+  },
+  {
+    "index": 20,
+    "codePoint": 128557,
+    "resourceName": "u1f62d",
+    "sourcePath": "res/ME.png",
+    "config": "xhdpi",
+    "asset": "assets/emoji/emoji_020.png"
+  },
+  {
+    "index": 21,
+    "codePoint": 128554,
+    "resourceName": "u1f62a",
+    "sourcePath": "res/2o.png",
+    "config": "xhdpi",
+    "asset": "assets/emoji/emoji_021.png"
+  },
+  {
+    "index": 22,
+    "codePoint": 128560,
+    "resourceName": "u1f630",
+    "sourcePath": "res/RC.png",
+    "config": "xhdpi",
+    "asset": "assets/emoji/emoji_022.png"
+  },
+  {
+    "index": 23,
+    "codePoint": 128517,
+    "resourceName": "u1f605",
+    "sourcePath": "res/j1.png",
+    "config": "xhdpi",
+    "asset": "assets/emoji/emoji_023.png"
+  },
+  {
+    "index": 24,
+    "codePoint": 128531,
+    "resourceName": "u1f613",
+    "sourcePath": "res/HB.png",
+    "config": "xhdpi",
+    "asset": "assets/emoji/emoji_024.png"
+  },
+  {
+    "index": 25,
+    "codePoint": 128555,
+    "resourceName": "u1f62b",
+    "sourcePath": "res/eC.png",
+    "config": "xhdpi",
+    "asset": "assets/emoji/emoji_025.png"
+  },
+  {
+    "index": 26,
+    "codePoint": 128553,
+    "resourceName": "u1f629",
+    "sourcePath": "res/Rl.png",
+    "config": "xhdpi",
+    "asset": "assets/emoji/emoji_026.png"
+  },
+  {
+    "index": 27,
+    "codePoint": 128552,
+    "resourceName": "u1f628",
+    "sourcePath": "res/sb.png",
+    "config": "xhdpi",
+    "asset": "assets/emoji/emoji_027.png"
+  },
+  {
+    "index": 28,
+    "codePoint": 128561,
+    "resourceName": "u1f631",
+    "sourcePath": "res/ac.png",
+    "config": "xhdpi",
+    "asset": "assets/emoji/emoji_028.png"
+  },
+  {
+    "index": 29,
+    "codePoint": 128545,
+    "resourceName": "u1f621",
+    "sourcePath": "res/GU.png",
+    "config": "xhdpi",
+    "asset": "assets/emoji/emoji_029.png"
+  },
+  {
+    "index": 30,
+    "codePoint": 128548,
+    "resourceName": "u1f624",
+    "sourcePath": "res/Pw.png",
+    "config": "xhdpi",
+    "asset": "assets/emoji/emoji_030.png"
+  },
+  {
+    "index": 31,
+    "codePoint": 128534,
+    "resourceName": "u1f616",
+    "sourcePath": "res/oW.png",
+    "config": "xhdpi",
+    "asset": "assets/emoji/emoji_031.png"
+  },
+  {
+    "index": 32,
+    "codePoint": 128518,
+    "resourceName": "u1f606",
+    "sourcePath": "res/3k.png",
+    "config": "xhdpi",
+    "asset": "assets/emoji/emoji_032.png"
+  },
+  {
+    "index": 33,
+    "codePoint": 128523,
+    "resourceName": "u1f60b",
+    "sourcePath": "res/Nm.png",
+    "config": "xhdpi",
+    "asset": "assets/emoji/emoji_033.png"
+  },
+  {
+    "index": 34,
+    "codePoint": 128567,
+    "resourceName": "u1f637",
+    "sourcePath": "res/gX.png",
+    "config": "xhdpi",
+    "asset": "assets/emoji/emoji_034.png"
+  },
+  {
+    "index": 35,
+    "codePoint": 128526,
+    "resourceName": "u1f60e",
+    "sourcePath": "res/Jz.png",
+    "config": "xhdpi",
+    "asset": "assets/emoji/emoji_035.png"
+  },
+  {
+    "index": 36,
+    "codePoint": 128564,
+    "resourceName": "u1f634",
+    "sourcePath": "res/Ky.png",
+    "config": "xhdpi",
+    "asset": "assets/emoji/emoji_036.png"
+  },
+  {
+    "index": 37,
+    "codePoint": 128562,
+    "resourceName": "u1f632",
+    "sourcePath": "res/Vd.png",
+    "config": "xhdpi",
+    "asset": "assets/emoji/emoji_037.png"
+  },
+  {
+    "index": 38,
+    "codePoint": 128558,
+    "resourceName": "u1f62e",
+    "sourcePath": "res/N2.png",
+    "config": "xhdpi",
+    "asset": "assets/emoji/emoji_038.png"
+  },
+  {
+    "index": 39,
+    "codePoint": 128520,
+    "resourceName": "u1f608",
+    "sourcePath": "res/uQ.png",
+    "config": "xhdpi",
+    "asset": "assets/emoji/emoji_039.png"
+  },
+  {
+    "index": 40,
+    "codePoint": 128127,
+    "resourceName": "u1f47f",
+    "sourcePath": "res/I0.png",
+    "config": "xhdpi",
+    "asset": "assets/emoji/emoji_040.png"
+  },
+  {
+    "index": 41,
+    "codePoint": 128559,
+    "resourceName": "u1f62f",
+    "sourcePath": "res/yR.png",
+    "config": "xhdpi",
+    "asset": "assets/emoji/emoji_041.png"
+  },
+  {
+    "index": 42,
+    "codePoint": 128556,
+    "resourceName": "u1f62c",
+    "sourcePath": "res/aX.png",
+    "config": "xhdpi",
+    "asset": "assets/emoji/emoji_042.png"
+  },
+  {
+    "index": 43,
+    "codePoint": 128533,
+    "resourceName": "u1f615",
+    "sourcePath": "res/71.png",
+    "config": "xhdpi",
+    "asset": "assets/emoji/emoji_043.png"
+  },
+  {
+    "index": 44,
+    "codePoint": 128565,
+    "resourceName": "u1f635",
+    "sourcePath": "res/xX.png",
+    "config": "xhdpi",
+    "asset": "assets/emoji/emoji_044.png"
+  },
+  {
+    "index": 45,
+    "codePoint": 128566,
+    "resourceName": "u1f636",
+    "sourcePath": "res/D_.png",
+    "config": "xhdpi",
+    "asset": "assets/emoji/emoji_045.png"
+  },
+  {
+    "index": 46,
+    "codePoint": 128519,
+    "resourceName": "u1f607",
+    "sourcePath": "res/F0.png",
+    "config": "xhdpi",
+    "asset": "assets/emoji/emoji_046.png"
+  },
+  {
+    "index": 47,
+    "codePoint": 128527,
+    "resourceName": "u1f60f",
+    "sourcePath": "res/yy.png",
+    "config": "xhdpi",
+    "asset": "assets/emoji/emoji_047.png"
+  },
+  {
+    "index": 48,
+    "codePoint": 128529,
+    "resourceName": "u1f611",
+    "sourcePath": "res/Wa.png",
+    "config": "xhdpi",
+    "asset": "assets/emoji/emoji_048.png"
+  },
+  {
+    "index": 49,
+    "codePoint": 128584,
+    "resourceName": "u1f648",
+    "sourcePath": "res/Ve.png",
+    "config": "xhdpi",
+    "asset": "assets/emoji/emoji_049.png"
+  },
+  {
+    "index": 50,
+    "codePoint": 128585,
+    "resourceName": "u1f649",
+    "sourcePath": "res/t6.png",
+    "config": "xhdpi",
+    "asset": "assets/emoji/emoji_050.png"
+  },
+  {
+    "index": 51,
+    "codePoint": 128586,
+    "resourceName": "u1f64a",
+    "sourcePath": "res/1n.png",
+    "config": "xhdpi",
+    "asset": "assets/emoji/emoji_051.png"
+  },
+  {
+    "index": 52,
+    "codePoint": 128125,
+    "resourceName": "u1f47d",
+    "sourcePath": "res/VO.png",
+    "config": "xhdpi",
+    "asset": "assets/emoji/emoji_052.png"
+  },
+  {
+    "index": 53,
+    "codePoint": 128169,
+    "resourceName": "u1f4a9",
+    "sourcePath": "res/Ga.png",
+    "config": "xhdpi",
+    "asset": "assets/emoji/emoji_053.png"
+  },
+  {
+    "index": 54,
+    "codePoint": 10084,
+    "resourceName": "u2764",
+    "sourcePath": "res/UC.png",
+    "config": "xhdpi",
+    "asset": "assets/emoji/emoji_054.png"
+  },
+  {
+    "index": 55,
+    "codePoint": 128148,
+    "resourceName": "u1f494",
+    "sourcePath": "res/8a.png",
+    "config": "xhdpi",
+    "asset": "assets/emoji/emoji_055.png"
+  },
+  {
+    "index": 56,
+    "codePoint": 128293,
+    "resourceName": "u1f525",
+    "sourcePath": "res/Tw.png",
+    "config": "xhdpi",
+    "asset": "assets/emoji/emoji_056.png"
+  },
+  {
+    "index": 57,
+    "codePoint": 128162,
+    "resourceName": "u1f4a2",
+    "sourcePath": "res/pC.png",
+    "config": "xhdpi",
+    "asset": "assets/emoji/emoji_057.png"
+  },
+  {
+    "index": 58,
+    "codePoint": 128164,
+    "resourceName": "u1f4a4",
+    "sourcePath": "res/qR.png",
+    "config": "xhdpi",
+    "asset": "assets/emoji/emoji_058.png"
+  },
+  {
+    "index": 59,
+    "codePoint": 128683,
+    "resourceName": "u1f6ab",
+    "sourcePath": "res/rg.png",
+    "config": "xhdpi",
+    "asset": "assets/emoji/emoji_059.png"
+  },
+  {
+    "index": 60,
+    "codePoint": 11088,
+    "resourceName": "u2b50",
+    "sourcePath": "res/gQ.png",
+    "config": "xhdpi",
+    "asset": "assets/emoji/emoji_060.png"
+  },
+  {
+    "index": 61,
+    "codePoint": 9889,
+    "resourceName": "u26a1",
+    "sourcePath": "res/iC.png",
+    "config": "xhdpi",
+    "asset": "assets/emoji/emoji_061.png"
+  },
+  {
+    "index": 62,
+    "codePoint": 127769,
+    "resourceName": "u1f319",
+    "sourcePath": "res/iY.png",
+    "config": "xhdpi",
+    "asset": "assets/emoji/emoji_062.png"
+  },
+  {
+    "index": 63,
+    "codePoint": 9728,
+    "resourceName": "u2600",
+    "sourcePath": "res/5f.png",
+    "config": "xhdpi",
+    "asset": "assets/emoji/emoji_063.png"
+  },
+  {
+    "index": 64,
+    "codePoint": 9925,
+    "resourceName": "u26c5",
+    "sourcePath": "res/pt.png",
+    "config": "xhdpi",
+    "asset": "assets/emoji/emoji_064.png"
+  },
+  {
+    "index": 65,
+    "codePoint": 9729,
+    "resourceName": "u2601",
+    "sourcePath": "res/C6.png",
+    "config": "xhdpi",
+    "asset": "assets/emoji/emoji_065.png"
+  },
+  {
+    "index": 66,
+    "codePoint": 10052,
+    "resourceName": "u2744",
+    "sourcePath": "res/-F.png",
+    "config": "xhdpi",
+    "asset": "assets/emoji/emoji_066.png"
+  },
+  {
+    "index": 67,
+    "codePoint": 9748,
+    "resourceName": "u2614",
+    "sourcePath": "res/57.png",
+    "config": "xhdpi",
+    "asset": "assets/emoji/emoji_067.png"
+  },
+  {
+    "index": 68,
+    "codePoint": 9924,
+    "resourceName": "u26c4",
+    "sourcePath": "res/qG.png",
+    "config": "xhdpi",
+    "asset": "assets/emoji/emoji_068.png"
+  },
+  {
+    "index": 69,
+    "codePoint": 128077,
+    "resourceName": "u1f44d",
+    "sourcePath": "res/Ur.png",
+    "config": "xhdpi",
+    "asset": "assets/emoji/emoji_069.png"
+  },
+  {
+    "index": 70,
+    "codePoint": 128078,
+    "resourceName": "u1f44e",
+    "sourcePath": "res/bc.png",
+    "config": "xhdpi",
+    "asset": "assets/emoji/emoji_070.png"
+  },
+  {
+    "index": 71,
+    "codePoint": 128076,
+    "resourceName": "u1f44c",
+    "sourcePath": "res/Kt.png",
+    "config": "xhdpi",
+    "asset": "assets/emoji/emoji_071.png"
+  },
+  {
+    "index": 72,
+    "codePoint": 128074,
+    "resourceName": "u1f44a",
+    "sourcePath": "res/X7.png",
+    "config": "xhdpi",
+    "asset": "assets/emoji/emoji_072.png"
+  },
+  {
+    "index": 73,
+    "codePoint": 9994,
+    "resourceName": "u270a",
+    "sourcePath": "res/gf.png",
+    "config": "xhdpi",
+    "asset": "assets/emoji/emoji_073.png"
+  },
+  {
+    "index": 74,
+    "codePoint": 9996,
+    "resourceName": "u270c",
+    "sourcePath": "res/9c.png",
+    "config": "xhdpi",
+    "asset": "assets/emoji/emoji_074.png"
+  },
+  {
+    "index": 75,
+    "codePoint": 9995,
+    "resourceName": "u270b",
+    "sourcePath": "res/Ch.png",
+    "config": "xhdpi",
+    "asset": "assets/emoji/emoji_075.png"
+  },
+  {
+    "index": 76,
+    "codePoint": 128591,
+    "resourceName": "u1f64f",
+    "sourcePath": "res/HS.png",
+    "config": "xhdpi",
+    "asset": "assets/emoji/emoji_076.png"
+  },
+  {
+    "index": 77,
+    "codePoint": 9757,
+    "resourceName": "u261d",
+    "sourcePath": "res/EF.png",
+    "config": "xhdpi",
+    "asset": "assets/emoji/emoji_077.png"
+  },
+  {
+    "index": 78,
+    "codePoint": 128079,
+    "resourceName": "u1f44f",
+    "sourcePath": "res/Fo.png",
+    "config": "xhdpi",
+    "asset": "assets/emoji/emoji_078.png"
+  },
+  {
+    "index": 79,
+    "codePoint": 129309,
+    "resourceName": "u1f91d",
+    "sourcePath": "res/F5.png",
+    "config": "xhdpi",
+    "asset": "assets/emoji/emoji_079.png"
+  },
+  {
+    "index": 80,
+    "codePoint": 128170,
+    "resourceName": "u1f4aa",
+    "sourcePath": "res/Sk.png",
+    "config": "xhdpi",
+    "asset": "assets/emoji/emoji_080.png"
+  },
+  {
+    "index": 81,
+    "codePoint": 128106,
+    "resourceName": "u1f46a",
+    "sourcePath": "res/u8.png",
+    "config": "xhdpi",
+    "asset": "assets/emoji/emoji_081.png"
+  },
+  {
+    "index": 82,
+    "codePoint": 128107,
+    "resourceName": "u1f46b",
+    "sourcePath": "res/5A.png",
+    "config": "xhdpi",
+    "asset": "assets/emoji/emoji_082.png"
+  },
+  {
+    "index": 83,
+    "codePoint": 128124,
+    "resourceName": "u1f47c",
+    "sourcePath": "res/xs.png",
+    "config": "xhdpi",
+    "asset": "assets/emoji/emoji_083.png"
+  },
+  {
+    "index": 84,
+    "codePoint": 128052,
+    "resourceName": "u1f434",
+    "sourcePath": "res/zZ.png",
+    "config": "xhdpi",
+    "asset": "assets/emoji/emoji_084.png"
+  },
+  {
+    "index": 85,
+    "codePoint": 128054,
+    "resourceName": "u1f436",
+    "sourcePath": "res/sa.png",
+    "config": "xhdpi",
+    "asset": "assets/emoji/emoji_085.png"
+  },
+  {
+    "index": 86,
+    "codePoint": 128055,
+    "resourceName": "u1f437",
+    "sourcePath": "res/zo.png",
+    "config": "xhdpi",
+    "asset": "assets/emoji/emoji_086.png"
+  },
+  {
+    "index": 87,
+    "codePoint": 128123,
+    "resourceName": "u1f47b",
+    "sourcePath": "res/KN.png",
+    "config": "xhdpi",
+    "asset": "assets/emoji/emoji_087.png"
+  },
+  {
+    "index": 88,
+    "codePoint": 127801,
+    "resourceName": "u1f339",
+    "sourcePath": "res/z_.png",
+    "config": "xhdpi",
+    "asset": "assets/emoji/emoji_088.png"
+  },
+  {
+    "index": 89,
+    "codePoint": 127803,
+    "resourceName": "u1f33b",
+    "sourcePath": "res/Rg.png",
+    "config": "xhdpi",
+    "asset": "assets/emoji/emoji_089.png"
+  },
+  {
+    "index": 90,
+    "codePoint": 127794,
+    "resourceName": "u1f332",
+    "sourcePath": "res/KX.png",
+    "config": "xhdpi",
+    "asset": "assets/emoji/emoji_090.png"
+  },
+  {
+    "index": 91,
+    "codePoint": 127876,
+    "resourceName": "u1f384",
+    "sourcePath": "res/MN.png",
+    "config": "xhdpi",
+    "asset": "assets/emoji/emoji_091.png"
+  },
+  {
+    "index": 92,
+    "codePoint": 127873,
+    "resourceName": "u1f381",
+    "sourcePath": "res/n-.png",
+    "config": "xhdpi",
+    "asset": "assets/emoji/emoji_092.png"
+  },
+  {
+    "index": 93,
+    "codePoint": 127881,
+    "resourceName": "u1f389",
+    "sourcePath": "res/60.png",
+    "config": "xhdpi",
+    "asset": "assets/emoji/emoji_093.png"
+  },
+  {
+    "index": 94,
+    "codePoint": 128176,
+    "resourceName": "u1f4b0",
+    "sourcePath": "res/nQ.png",
+    "config": "xhdpi",
+    "asset": "assets/emoji/emoji_094.png"
+  },
+  {
+    "index": 95,
+    "codePoint": 127874,
+    "resourceName": "u1f382",
+    "sourcePath": "res/M5.png",
+    "config": "xhdpi",
+    "asset": "assets/emoji/emoji_095.png"
+  },
+  {
+    "index": 96,
+    "codePoint": 127830,
+    "resourceName": "u1f356",
+    "sourcePath": "res/4D.png",
+    "config": "xhdpi",
+    "asset": "assets/emoji/emoji_096.png"
+  },
+  {
+    "index": 97,
+    "codePoint": 127834,
+    "resourceName": "u1f35a",
+    "sourcePath": "res/rT.png",
+    "config": "xhdpi",
+    "asset": "assets/emoji/emoji_097.png"
+  },
+  {
+    "index": 98,
+    "codePoint": 127846,
+    "resourceName": "u1f366",
+    "sourcePath": "res/5T.png",
+    "config": "xhdpi",
+    "asset": "assets/emoji/emoji_098.png"
+  },
+  {
+    "index": 99,
+    "codePoint": 127851,
+    "resourceName": "u1f36b",
+    "sourcePath": "res/0v.png",
+    "config": "xhdpi",
+    "asset": "assets/emoji/emoji_099.png"
+  },
+  {
+    "index": 100,
+    "codePoint": 127817,
+    "resourceName": "u1f349",
+    "sourcePath": "res/LS.png",
+    "config": "xhdpi",
+    "asset": "assets/emoji/emoji_100.png"
+  },
+  {
+    "index": 101,
+    "codePoint": 127863,
+    "resourceName": "u1f377",
+    "sourcePath": "res/4-.png",
+    "config": "xhdpi",
+    "asset": "assets/emoji/emoji_101.png"
+  },
+  {
+    "index": 102,
+    "codePoint": 127867,
+    "resourceName": "u1f37b",
+    "sourcePath": "res/Sx.png",
+    "config": "xhdpi",
+    "asset": "assets/emoji/emoji_102.png"
+  },
+  {
+    "index": 103,
+    "codePoint": 9749,
+    "resourceName": "u2615",
+    "sourcePath": "res/Pe.png",
+    "config": "xhdpi",
+    "asset": "assets/emoji/emoji_103.png"
+  },
+  {
+    "index": 104,
+    "codePoint": 127936,
+    "resourceName": "u1f3c0",
+    "sourcePath": "res/te.png",
+    "config": "xhdpi",
+    "asset": "assets/emoji/emoji_104.png"
+  },
+  {
+    "index": 105,
+    "codePoint": 9917,
+    "resourceName": "u26bd",
+    "sourcePath": "res/Ax.png",
+    "config": "xhdpi",
+    "asset": "assets/emoji/emoji_105.png"
+  },
+  {
+    "index": 106,
+    "codePoint": 127938,
+    "resourceName": "u1f3c2",
+    "sourcePath": "res/Nj.png",
+    "config": "xhdpi",
+    "asset": "assets/emoji/emoji_106.png"
+  },
+  {
+    "index": 107,
+    "codePoint": 128690,
+    "resourceName": "u1f6b2",
+    "sourcePath": "res/J5.png",
+    "config": "xhdpi",
+    "asset": "assets/emoji/emoji_107.png"
+  },
+  {
+    "index": 108,
+    "codePoint": 127908,
+    "resourceName": "u1f3a4",
+    "sourcePath": "res/bK.png",
+    "config": "xhdpi",
+    "asset": "assets/emoji/emoji_108.png"
+  },
+  {
+    "index": 109,
+    "codePoint": 127925,
+    "resourceName": "u1f3b5",
+    "sourcePath": "res/xr.png",
+    "config": "xhdpi",
+    "asset": "assets/emoji/emoji_109.png"
+  },
+  {
+    "index": 110,
+    "codePoint": 127922,
+    "resourceName": "u1f3b2",
+    "sourcePath": "res/RJ.png",
+    "config": "xhdpi",
+    "asset": "assets/emoji/emoji_110.png"
+  },
+  {
+    "index": 111,
+    "codePoint": 126980,
+    "resourceName": "u1f004",
+    "sourcePath": "res/FK.png",
+    "config": "xhdpi",
+    "asset": "assets/emoji/emoji_111.png"
+  },
+  {
+    "index": 112,
+    "codePoint": 128081,
+    "resourceName": "u1f451",
+    "sourcePath": "res/4c.png",
+    "config": "xhdpi",
+    "asset": "assets/emoji/emoji_112.png"
+  },
+  {
+    "index": 113,
+    "codePoint": 128132,
+    "resourceName": "u1f484",
+    "sourcePath": "res/YL.png",
+    "config": "xhdpi",
+    "asset": "assets/emoji/emoji_113.png"
+  },
+  {
+    "index": 114,
+    "codePoint": 128139,
+    "resourceName": "u1f48b",
+    "sourcePath": "res/YH.png",
+    "config": "xhdpi",
+    "asset": "assets/emoji/emoji_114.png"
+  },
+  {
+    "index": 115,
+    "codePoint": 128141,
+    "resourceName": "u1f48d",
+    "sourcePath": "res/n4.png",
+    "config": "xhdpi",
+    "asset": "assets/emoji/emoji_115.png"
+  },
+  {
+    "index": 116,
+    "codePoint": 128218,
+    "resourceName": "u1f4da",
+    "sourcePath": "res/qO.png",
+    "config": "xhdpi",
+    "asset": "assets/emoji/emoji_116.png"
+  },
+  {
+    "index": 117,
+    "codePoint": 127891,
+    "resourceName": "u1f393",
+    "sourcePath": "res/1q.png",
+    "config": "xhdpi",
+    "asset": "assets/emoji/emoji_117.png"
+  },
+  {
+    "index": 118,
+    "codePoint": 9999,
+    "resourceName": "u270f",
+    "sourcePath": "res/nS.png",
+    "config": "xhdpi",
+    "asset": "assets/emoji/emoji_118.png"
+  },
+  {
+    "index": 119,
+    "codePoint": 127969,
+    "resourceName": "u1f3e1",
+    "sourcePath": "res/a5.png",
+    "config": "xhdpi",
+    "asset": "assets/emoji/emoji_119.png"
+  },
+  {
+    "index": 120,
+    "codePoint": 128703,
+    "resourceName": "u1f6bf",
+    "sourcePath": "res/Rv.png",
+    "config": "xhdpi",
+    "asset": "assets/emoji/emoji_120.png"
+  },
+  {
+    "index": 121,
+    "codePoint": 128161,
+    "resourceName": "u1f4a1",
+    "sourcePath": "res/1K.png",
+    "config": "xhdpi",
+    "asset": "assets/emoji/emoji_121.png"
+  },
+  {
+    "index": 122,
+    "codePoint": 128222,
+    "resourceName": "u1f4de",
+    "sourcePath": "res/mB.png",
+    "config": "xhdpi",
+    "asset": "assets/emoji/emoji_122.png"
+  },
+  {
+    "index": 123,
+    "codePoint": 128226,
+    "resourceName": "u1f4e2",
+    "sourcePath": "res/0X.png",
+    "config": "xhdpi",
+    "asset": "assets/emoji/emoji_123.png"
+  },
+  {
+    "index": 124,
+    "codePoint": 128342,
+    "resourceName": "u1f556",
+    "sourcePath": "res/J8.png",
+    "config": "xhdpi",
+    "asset": "assets/emoji/emoji_124.png"
+  },
+  {
+    "index": 125,
+    "codePoint": 9200,
+    "resourceName": "u23f0",
+    "sourcePath": "res/eQ.png",
+    "config": "xhdpi",
+    "asset": "assets/emoji/emoji_125.png"
+  },
+  {
+    "index": 126,
+    "codePoint": 9203,
+    "resourceName": "u23f3",
+    "sourcePath": "res/g2.png",
+    "config": "xhdpi",
+    "asset": "assets/emoji/emoji_126.png"
+  },
+  {
+    "index": 127,
+    "codePoint": 128163,
+    "resourceName": "u1f4a3",
+    "sourcePath": "res/PD.png",
+    "config": "xhdpi",
+    "asset": "assets/emoji/emoji_127.png"
+  },
+  {
+    "index": 128,
+    "codePoint": 128299,
+    "resourceName": "u1f52b",
+    "sourcePath": "res/uS.png",
+    "config": "xhdpi",
+    "asset": "assets/emoji/emoji_128.png"
+  },
+  {
+    "index": 129,
+    "codePoint": 128138,
+    "resourceName": "u1f48a",
+    "sourcePath": "res/E4.png",
+    "config": "xhdpi",
+    "asset": "assets/emoji/emoji_129.png"
+  },
+  {
+    "index": 130,
+    "codePoint": 128640,
+    "resourceName": "u1f680",
+    "sourcePath": "res/gH.png",
+    "config": "xhdpi",
+    "asset": "assets/emoji/emoji_130.png"
+  },
+  {
+    "index": 131,
+    "codePoint": 127759,
+    "resourceName": "u1f30f",
+    "sourcePath": "res/M3.png",
+    "config": "xhdpi",
+    "asset": "assets/emoji/emoji_131.png"
+  }
+]

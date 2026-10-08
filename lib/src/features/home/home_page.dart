@@ -1,0 +1,806 @@
+import 'dart:convert';
+import 'dart:io';
+import 'package:file_picker/file_picker.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:share_plus/share_plus.dart';
+import 'package:zxing2/qrcode.dart';
+import '../../core/crypto_engine.dart';
+import '../../core/scan_picker.dart';
+import '../../core/share_codec.dart';
+import 'emoji_catalog.dart';
+import 'emoji_sheet.dart';
+import 'emoji_text_editing_controller.dart';
+import 'home_controller.dart';
+import 'home_status_banner.dart';
+import 'input_editor_pane.dart';
+import 'key_input_sheet.dart';
+import 'mode_panel.dart';
+import 'operation_bar.dart';
+import 'output_editor_pane.dart';
+import '../legal/legal_consent.dart';
+import '../legal/privacy_center.dart';
+import 'share_qr_dialog.dart';
+
+enum _ShareAction { system, copyLink, qr }
+
+class _ShareOptions {
+  const _ShareOptions({required this.includeKey});
+
+  final bool includeKey;
+}
+
+class HomePage extends StatefulWidget {
+  const HomePage({
+    super.key,
+    required this.controller,
+    this.onWithdrawConsent,
+  });
+  final HomeController controller;
+  final Future<void> Function()? onWithdrawConsent;
+  @override
+  State<HomePage> createState() => _HomePageState();
+}
+
+class _HomePageState extends State<HomePage> {
+  late final EmojiTextEditingController _input;
+  late final EmojiTextEditingController _output;
+  bool _keyDialogOpen = false;
+  HomeController get model => widget.controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _input = EmojiTextEditingController(text: model.input)
+      ..addListener(_inputChanged);
+    _output = EmojiTextEditingController(text: model.output);
+    model.addListener(_modelChanged);
+  }
+
+  void _inputChanged() {
+    if (_input.text != model.input) model.input = _input.text;
+  }
+
+  void _modelChanged() {
+    if (_input.text != model.input) {
+      _input.value = TextEditingValue(
+          text: model.input,
+          selection: TextSelection.collapsed(offset: model.input.length));
+    }
+    if (_output.text != model.output) _output.text = model.output;
+    if (mounted) setState(() {});
+  }
+
+  @override
+  void dispose() {
+    model.removeListener(_modelChanged);
+    _input.removeListener(_inputChanged);
+    _input.dispose();
+    _output.dispose();
+    super.dispose();
+  }
+
+  void _message(String text) {
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(text)));
+    }
+  }
+
+  Future<void> _run(bool encode) async {
+    if (model.busy || _keyDialogOpen || model.input.isEmpty) return;
+    FocusScope.of(context).unfocus();
+    var key = '';
+    if (model.mode.needsKey) {
+      _keyDialogOpen = true;
+      String? selected;
+      try {
+        if (encode) {
+          final saved = await _readSavedKey();
+          if (saved != null && saved.isNotEmpty) {
+            key = saved;
+          } else {
+            selected =
+                await _openKeyDialogWithResult(initialValue: saved ?? '');
+          }
+        } else {
+          selected = await _openKeyDialogWithResult();
+        }
+      } finally {
+        _keyDialogOpen = false;
+      }
+      if (!mounted || selected == null && key.isEmpty) return;
+      if (selected != null) key = selected;
+    }
+    await model.run(encode: encode, key: key);
+  }
+
+  Future<String?> _readSavedKey() async {
+    try {
+      return await model.readKey(model.mode);
+    } catch (_) {
+      _message('密钥存储未就绪，本次可直接输入');
+      return null;
+    }
+  }
+
+  Future<void> _showKeyDialog() async {
+    await _openKeyDialog();
+  }
+
+  Future<String?> _openKeyDialogWithResult({String? initialValue}) async {
+    final mode = model.mode;
+    final initial = initialValue ?? await _readSavedKey() ?? '';
+    if (!mounted) return null;
+    final result = await showDialog<KeySheetResult>(
+      context: context,
+      builder: (dialogContext) =>
+          KeyInputSheet(mode: mode, initialValue: initial),
+    );
+    final key = result?.value;
+    if (key != null && result!.remember) {
+      try {
+        await model.rememberKey(mode, key);
+      } catch (_) {
+        _message('本次密钥已使用，设备存储未保存');
+      }
+    }
+    return key;
+  }
+
+  Future<String?> _openKeyDialog({String? initialValue}) async {
+    if (model.busy || _keyDialogOpen || !model.mode.needsKey) return null;
+    FocusScope.of(context).unfocus();
+    _keyDialogOpen = true;
+    try {
+      return await _openKeyDialogWithResult(initialValue: initialValue);
+    } finally {
+      _keyDialogOpen = false;
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) => CallbackShortcuts(
+        bindings: {
+          const SingleActivator(LogicalKeyboardKey.enter, control: true): () =>
+              _run(true),
+          const SingleActivator(LogicalKeyboardKey.enter,
+              control: true, shift: true): () => _run(false),
+          const SingleActivator(LogicalKeyboardKey.enter, meta: true): () =>
+              _run(true),
+          const SingleActivator(LogicalKeyboardKey.enter,
+              meta: true, shift: true): () => _run(false),
+        },
+        child: Scaffold(
+          appBar: AppBar(
+            toolbarHeight: 64,
+            title: const Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('XY加密'),
+                Text('文本编码与加解密', style: TextStyle(fontSize: 11)),
+              ],
+            ),
+            actions: [
+              IconButton(
+                tooltip: '扫一扫',
+                onPressed: _scan,
+                icon: const Icon(Icons.qr_code_scanner),
+              ),
+              IconButton(
+                tooltip: '分享',
+                onPressed: model.shareText.isEmpty ? null : _share,
+                icon: const Icon(Icons.share_outlined),
+              ),
+              MenuAnchor(
+                menuChildren: [
+                  SubmenuButton(
+                    menuChildren: [
+                      MenuItemButton(
+                        onPressed: () => _menu('import'),
+                        child: const Text('导入文本或分享链接'),
+                      ),
+                      MenuItemButton(
+                        onPressed: () => _menu('pasteShare'),
+                        child: const Text('从剪贴板导入分享链接'),
+                      ),
+                    ],
+                    child: const Text('导入'),
+                  ),
+                  MenuItemButton(
+                    onPressed: () => _menu('update'),
+                    child: const Text('更新检测'),
+                  ),
+                  MenuItemButton(
+                    onPressed: () => _menu('privacyCenter'),
+                    child: const Text('隐私中心'),
+                  ),
+                  if (!Platform.isIOS)
+                    MenuItemButton(
+                      onPressed: () => _menu('exit'),
+                      child: const Text('退出'),
+                    ),
+                ],
+                builder: (context, controller, child) => IconButton(
+                  tooltip: '更多',
+                  onPressed: () => controller.isOpen
+                      ? controller.close()
+                      : controller.open(),
+                  icon: const Icon(Icons.more_vert),
+                ),
+              ),
+            ],
+          ),
+          body: SafeArea(
+            child: LayoutBuilder(
+              builder: (context, size) {
+                final landscape = size.maxWidth > size.maxHeight;
+                final desktop = size.maxWidth >= 1100;
+                final wide =
+                    size.maxWidth >= 700 || (landscape && size.maxWidth >= 600);
+                final editorHeight = size.maxHeight < 600
+                    ? 220.0
+                    : desktop
+                        ? 430.0
+                        : wide
+                            ? 320.0
+                            : 280.0;
+                final content = _content(
+                  wide: wide,
+                  desktop: desktop,
+                  editorHeight: editorHeight,
+                );
+                return SingleChildScrollView(
+                  padding: EdgeInsets.all(size.maxWidth < 360 ? 16 : 24),
+                  child: Center(
+                    child: ConstrainedBox(
+                      constraints: BoxConstraints(
+                        maxWidth: desktop
+                            ? 1440
+                            : wide
+                                ? 1100
+                                : 700,
+                      ),
+                      child: content,
+                    ),
+                  ),
+                );
+              },
+            ),
+          ),
+        ),
+      );
+
+  Widget _content({
+    required bool wide,
+    required bool desktop,
+    required double editorHeight,
+  }) {
+    final modePanel = ModePanel(
+      mode: model.mode,
+      wide: wide,
+      onAlgorithm: model.busy ? null : _chooseAlgorithm,
+      onEncoding: model.busy ? null : _chooseEncoding,
+      onKey: model.busy ? null : _showKeyDialog,
+    );
+    final input = InputEditorPane(
+      controller: _input,
+      height: editorHeight,
+      onImport: _pickFile,
+      onEmoji: _emoji,
+      onClear: model.clearInput,
+    );
+    final output = OutputEditorPane(
+      controller: _output,
+      height: editorHeight,
+      sourceMode: model.outputMode,
+      stale: model.outputStale,
+      onCopy: () => _copy(model.output),
+      onShare: _share,
+      onRestore: model.restoreOutputToInput,
+      onClear: model.clearOutput,
+    );
+    final operation = OperationBar(
+      spec: model.mode.operationSpec,
+      busy: model.busy,
+      wide: wide,
+      onPrimary: () => _run(true),
+      onSecondary: () => _run(false),
+    );
+    final editors = desktop
+        ? Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(child: input),
+              const SizedBox(width: 18),
+              SizedBox(width: 160, child: operation),
+              const SizedBox(width: 18),
+              Expanded(child: output),
+            ],
+          )
+        : wide
+            ? Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Expanded(child: input),
+                  const SizedBox(width: 18),
+                  Expanded(child: output),
+                ],
+              )
+            : Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  input,
+                  const SizedBox(height: 16),
+                  operation,
+                  const SizedBox(height: 16),
+                  output,
+                ],
+              );
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        modePanel,
+        const SizedBox(height: 18),
+        if (wide && !desktop) ...[
+          operation,
+          const SizedBox(height: 16),
+        ],
+        editors,
+        HomeStatusBanner(
+          busy: model.busy,
+          error: model.error,
+          message: model.statusMessage,
+        ),
+      ],
+    );
+  }
+
+  CryptoAlgorithmChoice _choiceForMode(CryptoMode mode) =>
+      cryptoAlgorithmChoices.firstWhere(
+        (choice) => choice.label == mode.algorithmLabel,
+      );
+
+  Future<void> _chooseAlgorithm() async {
+    FocusScope.of(context).unfocus();
+    final currentChoice = _choiceForMode(model.mode);
+    final choice = await showDialog<CryptoAlgorithmChoice>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text('请选择算法'),
+        content: SizedBox(
+          width: 320,
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                for (final item in cryptoAlgorithmChoices)
+                  ListTile(
+                    selected: item == currentChoice,
+                    title: Text(item.label),
+                    trailing:
+                        item == currentChoice ? const Icon(Icons.check) : null,
+                    onTap: () => Navigator.pop(dialogContext, item),
+                  ),
+              ],
+            ),
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext),
+            child: const Text('取消'),
+          ),
+        ],
+      ),
+    );
+    if (!mounted || choice == null) return;
+
+    var nextMode = choice.modes.first;
+    for (final mode in choice.modes) {
+      if (mode.formatLabel == model.mode.formatLabel) {
+        nextMode = mode;
+        break;
+      }
+    }
+    model.setMode(nextMode);
+  }
+
+  Future<void> _chooseEncoding() async {
+    FocusScope.of(context).unfocus();
+    final currentMode = model.mode;
+    final choice = _choiceForMode(currentMode);
+    final selected = await showDialog<CryptoMode>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: Text('${choice.label} · 请选择编码方式'),
+        content: SizedBox(
+          width: 320,
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                for (final mode in choice.modes)
+                  ListTile(
+                    selected: mode == currentMode,
+                    title: Text(mode.formatLabel),
+                    trailing:
+                        mode == currentMode ? const Icon(Icons.check) : null,
+                    onTap: () => Navigator.pop(dialogContext, mode),
+                  ),
+              ],
+            ),
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext),
+            child: const Text('取消'),
+          ),
+        ],
+      ),
+    );
+    if (mounted && selected != null) model.setMode(selected);
+  }
+
+  Future<void> _emoji() async {
+    FocusScope.of(context).unfocus();
+    await showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      barrierColor: Colors.transparent,
+      backgroundColor: Theme.of(context).colorScheme.surface,
+      builder: (_) => OriginalEmojiSheet(
+        entries: originalEmojiCatalog,
+        onSelection: _handleEmojiSelection,
+      ),
+    );
+  }
+
+  void _handleEmojiSelection(EmojiPanelSelection selected) {
+    if (selected.isDelete) {
+      _deletePreviousEmoji();
+      return;
+    }
+    final item = selected.item;
+    if (item == null) return;
+    final value = item.insertionText;
+    final selection = _input.selection;
+    final start = selection.isValid ? selection.start : _input.text.length;
+    final end = selection.isValid ? selection.end : _input.text.length;
+    _input.value = TextEditingValue(
+      text: _input.text.replaceRange(start, end, value),
+      selection: TextSelection.collapsed(offset: start + value.length),
+    );
+  }
+
+  void _deletePreviousEmoji() {
+    final selection = _input.selection;
+    if (!selection.isValid || !selection.isCollapsed || selection.start <= 0) {
+      return;
+    }
+    final text = _input.text;
+    var start = selection.start - 1;
+    final previous = text.codeUnitAt(start);
+    if (previous >= 0xDC00 && previous <= 0xDFFF && start > 0) {
+      final high = text.codeUnitAt(start - 1);
+      if (high >= 0xD800 && high <= 0xDBFF) start--;
+    }
+    final tokenStart = text.lastIndexOf('[', selection.start - 1);
+    final tokenEnd = text.lastIndexOf(']', selection.start - 1);
+    if (tokenEnd == selection.start - 1 && tokenStart >= 0) start = tokenStart;
+    _input.value = TextEditingValue(
+      text: text.replaceRange(start, selection.start, ''),
+      selection: TextSelection.collapsed(offset: start),
+    );
+  }
+
+  Future<void> _pickFile() async {
+    try {
+      final files = await FilePicker.platform.pickFiles(withData: true);
+      if (files == null) return;
+      final file = files.files.single;
+      final bytes = file.bytes ??
+          (file.path == null ? null : await File(file.path!).readAsBytes());
+      if (bytes == null || !mounted) return;
+      model.input = utf8.decode(
+          bytes); // report invalid text rather than silently replace bytes
+    } catch (error) {
+      _message('文本读取失败：$error');
+    }
+  }
+
+  Future<void> _scan() async {
+    try {
+      final text = await scanText(context);
+      if (mounted && text != null) await model.importText(text);
+    } catch (error) {
+      _message('识别失败：$error');
+    }
+  }
+
+  Future<void> _copy(String text) async {
+    try {
+      await Clipboard.setData(ClipboardData(text: text));
+      _message('复制成功');
+    } catch (error) {
+      _message('复制失败：$error');
+    }
+  }
+
+  Future<void> _share() async {
+    if (model.shareText.isEmpty) {
+      _message('请先生成结果');
+      return;
+    }
+    final shareOptions = await _askShareOptions();
+    if (!mounted || shareOptions == null) return;
+    late final Uri uri;
+    try {
+      uri = ShareCodec.encode(
+        model.shareMode,
+        model.shareText,
+        operation: model.shareIsEncrypted ? ShareCodec.encryptOperation : null,
+        key: shareOptions.includeKey && model.shareIsEncrypted
+            ? model.shareKey
+            : null,
+      );
+    } on FormatException catch (error) {
+      _message(error.message);
+      return;
+    }
+    final action = await showModalBottomSheet<_ShareAction>(
+      context: context,
+      builder: (sheetContext) => SafeArea(
+        child: Column(mainAxisSize: MainAxisSize.min, children: [
+          ListTile(
+            leading: const Icon(Icons.ios_share_outlined),
+            title: const Text('系统分享'),
+            subtitle: Text(shareOptions.includeKey ? '包含密钥的可导入链接' : '不包含密钥'),
+            onTap: () => Navigator.pop(sheetContext, _ShareAction.system),
+          ),
+          ListTile(
+            leading: const Icon(Icons.link),
+            title: const Text('复制链接'),
+            subtitle: const Text('复制 xyd 分享链接'),
+            onTap: () => Navigator.pop(sheetContext, _ShareAction.copyLink),
+          ),
+          ListTile(
+            leading: const Icon(Icons.qr_code_2),
+            title: const Text('二维码'),
+            subtitle: const Text('使用扫一扫导入'),
+            onTap: () => Navigator.pop(sheetContext, _ShareAction.qr),
+          ),
+        ]),
+      ),
+    );
+    if (!mounted || action == null) return;
+    switch (action) {
+      case _ShareAction.system:
+        await _shareSystem(uri);
+      case _ShareAction.copyLink:
+        await _copyShareLink(uri);
+      case _ShareAction.qr:
+        await _showShareQr(uri);
+    }
+  }
+
+  Future<_ShareOptions?> _askShareOptions() async {
+    var includeKey = false;
+    final canIncludeKey = model.shareIsEncrypted && model.shareKey.isNotEmpty;
+    return showDialog<_ShareOptions>(
+      context: context,
+      builder: (dialogContext) => StatefulBuilder(
+        builder: (dialogContext, refresh) => AlertDialog(
+          title: const Text('分享设置'),
+          content: CheckboxListTile(
+            contentPadding: EdgeInsets.zero,
+            value: includeKey,
+            title: const Text('在分享链接中包含密钥'),
+            subtitle: Text(
+              !model.shareIsEncrypted
+                  ? '仅可逆加密结果支持携带密钥'
+                  : model.shareKey.isEmpty
+                      ? '当前结果没有可分享的密钥'
+                      : '密钥会与密文一起发送，获得链接的人可读取密钥并解密',
+            ),
+            onChanged: canIncludeKey
+                ? (value) => refresh(() => includeKey = value ?? false)
+                : null,
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(dialogContext),
+              child: const Text('取消'),
+            ),
+            TextButton(
+              onPressed: () => Navigator.pop(
+                dialogContext,
+                _ShareOptions(includeKey: includeKey),
+              ),
+              child: const Text('继续'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Future<void> _shareSystem(Uri uri) async {
+    final box = context.findRenderObject() as RenderBox?;
+    try {
+      await Share.share(
+        ShareCodec.composeMessage(uri),
+        subject: 'XY加密分享',
+        sharePositionOrigin:
+            box == null ? null : box.localToGlobal(Offset.zero) & box.size,
+      );
+    } catch (error) {
+      _message('分享失败，可使用复制链接：$error');
+    }
+  }
+
+  Future<void> _copyShareLink(Uri uri) async {
+    try {
+      await Clipboard.setData(ClipboardData(text: uri.toString()));
+      _message('分享链接已复制');
+    } catch (error) {
+      _message('复制链接失败：$error');
+    }
+  }
+
+  Future<void> _showShareQr(Uri uri) async {
+    try {
+      final code = Encoder.encode(
+        uri.toString(),
+        ErrorCorrectionLevel.m,
+      );
+      if (!mounted) return;
+      await showDialog<void>(
+        context: context,
+        builder: (_) => ShareQrDialog(
+          code: code,
+          link: uri.toString(),
+          onCopy: () => _copyShareLink(uri),
+        ),
+      );
+    } catch (error) {
+      _message('二维码生成失败：$error');
+    }
+  }
+
+  Future<void> _pasteShare() async {
+    try {
+      final data = await Clipboard.getData(Clipboard.kTextPlain);
+      final text = data?.text?.trim();
+      if (text == null || text.isEmpty) {
+        _message('剪贴板没有文本');
+        return;
+      }
+      if (!await model.importText(text, allowPlainText: false)) {
+        _message('剪贴板中没有有效的 XY 分享链接');
+        return;
+      }
+      _message('剪贴板分享内容已导入');
+    } on FormatException catch (error) {
+      _message(error.message);
+    } catch (error) {
+      _message('读取剪贴板失败：$error');
+    }
+  }
+
+  Future<void> _import() async {
+    final editor = TextEditingController();
+    final value = await showDialog<String>(
+        context: context,
+        builder: (context) => AlertDialog(
+              title: const Text('导入文本或分享链接'),
+              content: TextField(controller: editor, maxLines: 5),
+              actions: [
+                TextButton(
+                    onPressed: () => Navigator.pop(context, editor.text),
+                    child: const Text('导入'))
+              ],
+            ));
+    Future<void>.delayed(const Duration(seconds: 1), editor.dispose);
+    if (mounted && value != null) {
+      try {
+        await model.importText(value);
+      } catch (error) {
+        _message('$error');
+      }
+    }
+  }
+
+  void _menu(String action) {
+    switch (action) {
+      case 'import':
+        _import();
+      case 'pasteShare':
+        _pasteShare();
+      case 'update':
+        _message('当前为开发预览版，更新服务尚未配置');
+      case 'agreement':
+        _openLegalDocument(privacy: false);
+      case 'privacy':
+        _openLegalDocument(privacy: true);
+      case 'privacyCenter':
+        Navigator.of(context).push(MaterialPageRoute<void>(
+            builder: (_) => PrivacyCenter(
+                onClearKeys: _confirmClearKeys,
+                onWithdraw: _confirmWithdrawConsent)));
+      case 'clearKeys':
+        _confirmClearKeys();
+      case 'withdrawConsent':
+        _confirmWithdrawConsent();
+      case 'exit':
+        if (Platform.isAndroid) {
+          SystemNavigator.pop();
+        } else {
+          _message('请使用窗口关闭按钮退出');
+        }
+    }
+  }
+
+  Future<void> _openLegalDocument({required bool privacy}) =>
+      Navigator.of(context).push(
+        MaterialPageRoute<void>(
+          builder: (_) => LegalDocumentPage(privacy: privacy),
+        ),
+      );
+
+  Future<void> _confirmClearKeys() async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text('清除本机已保存密钥？'),
+        content: const Text('这会删除本应用保存的所有算法密钥，不影响当前输入框内容。此操作无法撤销。'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext, false),
+            child: const Text('取消'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(dialogContext, true),
+            child: const Text('清除'),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true || !mounted) return;
+    try {
+      await model.clearRememberedKeys();
+      if (!mounted) return;
+      _message('本机已保存密钥已清除');
+    } catch (error) {
+      _message('清除失败：$error');
+    }
+  }
+
+  Future<void> _confirmWithdrawConsent() async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text('撤回协议同意？'),
+        content: const Text('撤回后清空当前会话并退出应用，下次启动重新确认。已保存密钥请通过清除密钥入口单独删除。'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext, false),
+            child: const Text('取消'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(dialogContext, true),
+            child: const Text('撤回并退出'),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true || !mounted) return;
+    try {
+      Navigator.of(context).popUntil((route) => route.isFirst);
+      await widget.onWithdrawConsent?.call();
+    } catch (_) {
+      _message('撤回尚未完成，请重试');
+    }
+  }
+}

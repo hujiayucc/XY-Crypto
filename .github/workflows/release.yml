@@ -1,0 +1,253 @@
+name: XY Crypto Release Builds
+
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+    inputs:
+      tag_name:
+        description: GitHub Release tag to create
+        required: true
+        default: v1.3.1
+        type: string
+
+env:
+  FLUTTER_VERSION: '3.35.4'
+  APP_VERSION: '1.3.1'
+  BUILD_NUMBER: '180'
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    name: Verify release source
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+          cache: true
+      - run: flutter pub get
+      - run: flutter analyze --no-pub
+      - run: flutter test --no-pub
+
+  android:
+    name: Android release ${{ matrix.abi }}
+    needs: verify
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - abi: arm32
+            flutter_arch: arm
+            artifact: android-arm32-apk
+          - abi: arm64
+            flutter_arch: arm64
+            artifact: android-arm64-apk
+          - abi: x86_64
+            flutter_arch: x64
+            artifact: android-x86_64-apk
+          - abi: all
+            flutter_arch: all
+            artifact: android-all-apk
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+          cache: true
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - run: node tool/build_legal_site.cjs
+      - run: flutter pub get
+      - name: Restore optional Android signing key
+        shell: bash
+        env:
+          KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          STORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+        run: |
+          if [ -z "$KEYSTORE_BASE64" ]; then
+            echo 'Android signing secrets are absent; the release artifact will use the Gradle debug key.'
+            exit 0
+          fi
+          printf '%s' "$KEYSTORE_BASE64" | base64 --decode > android/app/ci-upload.jks
+          cat > android/key.properties <<EOF
+          storePassword=$STORE_PASSWORD
+          keyPassword=$KEY_PASSWORD
+          keyAlias=$KEY_ALIAS
+          storeFile=ci-upload.jks
+          EOF
+      - name: Build Release APK
+        shell: bash
+        run: |
+          if [ "${{ matrix.flutter_arch }}" = all ]; then
+            flutter build apk --release --no-pub
+          else
+            flutter build apk --release --no-pub --target-platform android-${{ matrix.flutter_arch }}
+          fi
+      - name: Rename APK
+        shell: bash
+        run: mv build/app/outputs/flutter-apk/app-release.apk "${{ matrix.artifact }}.apk"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: release-${{ matrix.artifact }}
+          path: ${{ matrix.artifact }}.apk
+
+  windows:
+    name: Windows release ${{ matrix.arch }}
+    needs: verify
+    runs-on: windows-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - arch: amd64
+            flutter_arch: x64
+            vs_arch: x64
+          - arch: arm64
+            flutter_arch: arm64
+            vs_arch: x64_arm64
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+          cache: true
+      - uses: ilammy/msvc-dev-cmd@v1
+        with:
+          arch: ${{ matrix.vs_arch }}
+      - name: Install Inno Setup
+        shell: pwsh
+        run: choco install innosetup --no-progress -y
+      - run: node tool/build_legal_site.cjs
+      - run: flutter pub get
+      - name: Build Release Windows bundle
+        shell: pwsh
+        run: flutter build windows --release --no-pub --target-platform windows-${{ matrix.flutter_arch }}
+      - name: Package portable ZIP
+        shell: pwsh
+        run: |
+          $bundle = "build/windows/${{ matrix.flutter_arch }}/runner/Release"
+          if (!(Test-Path $bundle)) { throw "Windows bundle not found: $bundle" }
+          New-Item -ItemType Directory -Force -Path ci-dist | Out-Null
+          Compress-Archive -Path "$bundle\*" -DestinationPath "ci-dist/XY-Crypto-windows-${{ matrix.arch }}-portable.zip" -Force
+      - name: Build setup.exe
+        shell: pwsh
+        run: |
+          $bundle = "${{ github.workspace }}\build\windows\${{ matrix.flutter_arch }}\runner\Release"
+          if (!(Test-Path $bundle)) { throw "Windows bundle not found: $bundle" }
+          $env:BUILD_DIR = $bundle
+          $env:OUTPUT_DIR = "${{ github.workspace }}\ci-dist"
+          $env:ARCH_LABEL = '${{ matrix.arch }}'
+          & "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe" packaging/windows/xy_encrypt_app.iss
+      - uses: actions/upload-artifact@v4
+        with:
+          name: release-windows-${{ matrix.arch }}
+          path: ci-dist/*
+
+  linux:
+    name: Linux release ${{ matrix.arch }}
+    needs: verify
+    runs-on: ${{ matrix.runner }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - arch: amd64
+            runner: ubuntu-24.04
+            flutter_arch: x64
+            deb_arch: amd64
+          - arch: arm64
+            runner: ubuntu-24.04-arm
+            flutter_arch: arm64
+            deb_arch: arm64
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+          cache: true
+      - name: Install Linux build tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y clang cmake ninja-build pkg-config libgtk-3-dev liblzma-dev libsecret-1-dev dpkg-dev qemu-user-static
+      - run: flutter config --enable-linux-desktop
+      - run: node tool/build_legal_site.cjs
+      - run: flutter pub get
+      - name: Build Release Linux bundle
+        shell: bash
+        run: flutter build linux --release --no-pub --target-platform linux-${{ matrix.flutter_arch }}
+      - name: Package portable tarball and deb
+        shell: bash
+        run: |
+          set -eux
+          mkdir -p ci-dist
+          bundle="build/linux/${{ matrix.flutter_arch }}/release/bundle"
+          tar -C "$(dirname "$bundle")" -czf "ci-dist/XY-Crypto-linux-${{ matrix.arch }}-portable.tar.gz" "$(basename "$bundle")"
+          bash packaging/linux/build-deb.sh "$bundle" ci-dist "${{ matrix.deb_arch }}"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: release-linux-${{ matrix.arch }}
+          path: ci-dist/*
+
+  apple:
+    name: Apple release archives
+    needs: verify
+    runs-on: macos-14
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+          cache: true
+      - run: node tool/build_legal_site.cjs
+      - run: flutter pub get
+      - name: Build Release iOS archive
+        run: flutter build ios --release --no-codesign --no-pub
+      - name: Build Release macOS archive
+        run: flutter build macos --release --no-codesign --no-pub
+      - name: Package Apple release archives
+        shell: bash
+        run: |
+          set -eux
+          mkdir -p ci-dist
+          ios_app=$(find build/ios/iphoneos -maxdepth 1 -name '*.app' -print -quit)
+          tar -C "$(dirname "$ios_app")" -czf ci-dist/XY-Crypto-ios-release-unsigned.tar.gz "$(basename "$ios_app")"
+          mac_app=$(find build/macos/Build/Products/Release -maxdepth 1 -name '*.app' -print -quit)
+          ditto -c -k --sequesterRsrc --keepParent "$mac_app" ci-dist/XY-Crypto-macos-release-unsigned.zip
+      - uses: actions/upload-artifact@v4
+        with:
+          name: release-apple
+          path: ci-dist/*
+
+  publish:
+    name: Publish stable GitHub Release
+    needs: [android, windows, linux, apple]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: release-assets
+          merge-multiple: true
+      - uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ startsWith(github.ref, 'refs/tags/v') && github.ref_name || inputs.tag_name }}
+          name: XY Crypto ${{ startsWith(github.ref, 'refs/tags/v') && github.ref_name || inputs.tag_name }}
+          prerelease: false
+          make_latest: true
+          generate_release_notes: true
+          files: release-assets/*

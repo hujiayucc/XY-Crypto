@@ -1,0 +1,63 @@
+# Flutter, Dart, and platform-generated files
+.dart_tool/
+.packages
+.pub/
+.flutter-plugins
+.flutter-plugins-dependencies
+build/
+**/build/
+**/ephemeral/
+android/local.properties
+android/key.properties
+ios/Flutter/Generated.xcconfig
+macos/Flutter/ephemeral/
+
+# Local signing material
+android/app/*.jks
+android/app/*.keystore
+android/*.jks
+android/*.keystore
+*.p12
+*.pfx
+*.mobileprovision
+*.cer
+*.pem
+*.p8
+
+# Local CI/package output
+ci-dist/
+packaging/**/dist/
+build_artifacts/
+
+# Generated Flutter plugin bridges
+linux/flutter/generated_plugins.cmake
+linux/flutter/generated_plugin_registrant.*
+windows/flutter/generated_plugins.cmake
+windows/flutter/generated_plugin_registrant.*
+
+# Local logs and stale checksum snapshots
+*.log
+SHA256SUMS.txt
+packages/*/pubspec.lock
+
+# Generated validation output and historical reverse-engineering evidence
+docs/evidence/
+docs/runtime/
+docs/validation/*.log
+docs/validation/core_results.json
+docs/validation/final_validation.json
+docs/validation/android_build_notes.md
+docs/validation/privacy_compliance.md
+docs/validation/share_validation.md
+docs/validation/emoji_validation.md
+docs/verification.json
+docs/BUILD.md
+docs/MIGRATION_SPEC.md
+docs/theme_tokens.json
+
+# IDE and OS files
+.idea/
+.vscode/
+*.iml
+.DS_Store
+Thumbs.db

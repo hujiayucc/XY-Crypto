@@ -1,0 +1,41 @@
+name: xy_encrypt_app
+description: Five-platform text utility based on the inspected 1.3.1 behavior.
+publish_to: none
+version: 1.3.1+180
+
+environment:
+  sdk: '>=3.5.0 <4.0.0'
+  flutter: '>=3.24.0'
+
+dependencies:
+  xy_crypto:
+    path: packages/xy_crypto
+  flutter:
+    sdk: flutter
+  flutter_localizations:
+    sdk: flutter
+  file_picker: ^8.1.4
+  mobile_scanner: ^6.0.2
+  share_plus: ^10.1.2
+  flutter_secure_storage: ^9.2.2
+  url_launcher: ^6.3.1
+  webview_flutter: ^4.10.0
+  image: ^4.3.0
+  zxing2: ^0.2.3
+  app_links: ^6.3.2
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^5.0.0
+
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/legal/
+    - build_artifacts/legal_site/privacy_policy_zh.html
+    - build_artifacts/legal_site/user_agreement_zh.html
+    - assets/emoji/
+    - assets/smiley/qq/
+    - assets/smiley/huaji/
+    - assets/smiley/doge/
