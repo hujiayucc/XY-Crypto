@@ -46,6 +46,9 @@ Description: XY加密 text encoding and encryption utility
  A Flutter desktop application for local text encoding and encryption.
 EOF
 
+# dpkg-deb requires the metadata directory to be traversable by all users.
+chmod 755 "${PACKAGE_ROOT}/DEBIAN"
+chmod 644 "${PACKAGE_ROOT}/DEBIAN/control"
 dpkg-deb --build --root-owner-group "${PACKAGE_ROOT}" "${DEB_PATH}" >/dev/null
 rm -rf "${PACKAGE_ROOT}"
 printf '%s\n' "Created ${DEB_PATH}"

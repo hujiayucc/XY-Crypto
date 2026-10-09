@@ -123,6 +123,10 @@ jobs:
           flutter-version: ${{ env.FLUTTER_VERSION }}
           channel: stable
           cache: true
+      - name: Use Flutter source tool on Windows
+        if: ${{ !matrix.custom_flutter }}
+        shell: pwsh
+        run: pwsh -File tool/setup_flutter_windows.ps1 $env:FLUTTER_ROOT
       - name: Set up Dart ARM64
         if: ${{ matrix.custom_flutter }}
         uses: dart-lang/setup-dart@v1
