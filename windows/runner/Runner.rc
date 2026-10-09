@@ -14,10 +14,10 @@
 #undef APSTUDIO_READONLY_SYMBOLS
 
 /////////////////////////////////////////////////////////////////////////////
-// English (United States) resources
+// Chinese (Simplified) resources
 
-#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
-LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_CHS)
+LANGUAGE LANG_CHINESE, SUBLANG_CHINESE_SIMPLIFIED
 
 #ifdef APSTUDIO_INVOKED
 /////////////////////////////////////////////////////////////////////////////
@@ -87,13 +87,13 @@ VS_VERSION_INFO VERSIONINFO
 BEGIN
     BLOCK "StringFileInfo"
     BEGIN
-        BLOCK "040904e4"
+        BLOCK "080404b0"
         BEGIN
             VALUE "CompanyName", "XY加密" "\0"
             VALUE "FileDescription", "XY加密" "\0"
             VALUE "FileVersion", VERSION_AS_STRING "\0"
             VALUE "InternalName", "XY加密" "\0"
-            VALUE "LegalCopyright", "Copyright (C) 2026 XY加密. All rights reserved." "\0"
+            VALUE "LegalCopyright", "版权所有 (C) 2026 XY加密。保留所有权利。" "\0"
             VALUE "OriginalFilename", "xy_encrypt_app.exe" "\0"
             VALUE "ProductName", "XY加密" "\0"
             VALUE "ProductVersion", VERSION_AS_STRING "\0"
@@ -101,11 +101,11 @@ BEGIN
     END
     BLOCK "VarFileInfo"
     BEGIN
-        VALUE "Translation", 0x409, 1252
+        VALUE "Translation", 0x804, 1200
     END
 END
 
-#endif    // English (United States) resources
+#endif    // Chinese (Simplified) resources
 /////////////////////////////////////////////////////////////////////////////
 
 

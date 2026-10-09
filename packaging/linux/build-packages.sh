@@ -28,7 +28,9 @@ else
 [Desktop Entry]
 Type=Application
 Name=XY加密
-Exec=xy_encrypt_app
+Comment=文本编码与加解密
+Exec=xy_encrypt_app %u
+MimeType=x-scheme-handler/xyd;
 Icon=com.hujiayucc.decode
 Categories=Utility;
 Terminal=false
@@ -45,9 +47,9 @@ done
 
 # Generic archives contain the runnable Flutter bundle directly.
 tar -C "$(dirname "${BUNDLE_DIR}")" -czf \
-  "${OUTPUT_DIR}/XY-Crypto-linux-${ARCH}-portable.tar.gz" "$(basename "${BUNDLE_DIR}")"
+  "${OUTPUT_DIR}/XY加密-Linux-${ARCH}.tar.gz" "$(basename "${BUNDLE_DIR}")"
 tar -C "$(dirname "${BUNDLE_DIR}")" -cJf \
-  "${OUTPUT_DIR}/XY-Crypto-linux-${ARCH}-portable.tar.xz" "$(basename "${BUNDLE_DIR}")"
+  "${OUTPUT_DIR}/XY加密-Linux-${ARCH}.tar.xz" "$(basename "${BUNDLE_DIR}")"
 
 # Debian-family package.
 bash packaging/linux/build-deb.sh "${BUNDLE_DIR}" "${OUTPUT_DIR}" "${ARCH}"
@@ -65,7 +67,7 @@ cat > "${RPM_ROOT}/SPECS/${APP_NAME}.spec" <<EOF
 Name:           ${APP_NAME}
 Version:        ${VERSION}
 Release:        1
-Summary:        XY encryption and text utility
+Summary:        XY加密：文本编码与加解密工具
 License:        Proprietary
 BuildArch:      ${RPM_ARCH}
 Requires:       gtk3
@@ -73,7 +75,7 @@ Requires:       glib2
 Requires:       libsecret
 
 %description
-XY encryption and text encoding utility.
+XY加密支持在本地进行文本编码、加密、解密及分享内容导入。
 
 %prep
 
@@ -91,7 +93,7 @@ cp -a %{_sourcedir}/root/. %{buildroot}/
 EOF
 rpmbuild --define "_topdir ${RPM_ROOT}" --target "${RPM_ARCH}" \
   -bb "${RPM_ROOT}/SPECS/${APP_NAME}.spec" >/dev/null
-cp "${RPM_ROOT}/RPMS/${RPM_ARCH}/"*.rpm "${OUTPUT_DIR}/XY-Crypto-linux-${ARCH}.rpm"
+cp "${RPM_ROOT}/RPMS/${RPM_ARCH}/"*.rpm "${OUTPUT_DIR}/XY加密-Linux-${ARCH}.rpm"
 
 # Arch-family package. This is a valid pacman package archive with a standard .PKGINFO.
 ARCH_ROOT="${OUTPUT_DIR}/${APP_NAME}-arch-root"
@@ -103,7 +105,7 @@ cat > "${ARCH_ROOT}/.PKGINFO" <<EOF
 pkgname = ${APP_NAME}
 pkgbase = ${APP_NAME}
 pkgver = ${VERSION}-1
-pkgdesc = XY encryption and text encoding utility
+pkgdesc = XY加密：文本编码与加解密工具
 url = https://github.com/hujiayucc/XY-Crypto
 builddate = $(date +%s)
 packager = XY Crypto CI
@@ -115,7 +117,7 @@ depend = glib2
 depend = libsecret
 EOF
 tar --zstd -C "${ARCH_ROOT}" -cf \
-  "${OUTPUT_DIR}/XY-Crypto-linux-${ARCH}.pkg.tar.zst" .
+  "${OUTPUT_DIR}/XY加密-Linux-${ARCH}.pkg.tar.zst" .
 rm -rf "${ARCH_ROOT}"
 
 printf '%s\n' "Created Linux packages for ${ARCH}"

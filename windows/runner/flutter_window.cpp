@@ -1,6 +1,7 @@
 #include "flutter_window.h"
 
 #include <optional>
+#include <cstring>
 
 #include "flutter/generated_plugin_registrant.h"
 
@@ -51,6 +52,16 @@ LRESULT
 FlutterWindow::MessageHandler(HWND hwnd, UINT const message,
                               WPARAM const wparam,
                               LPARAM const lparam) noexcept {
+  if (message == WM_COPYDATA && lparam != 0) {
+    const auto* data = reinterpret_cast<const COPYDATASTRUCT*>(lparam);
+    if (data->dwData == WM_USER + 2) {
+      if (!data->lpData || data->cbData < 5 || data->cbData > 65536) return FALSE;
+      const auto* bytes = static_cast<const char*>(data->lpData);
+      if (bytes[data->cbData - 1] != '\0' ||
+          std::memchr(bytes, '\0', data->cbData - 1) != nullptr ||
+          _strnicmp(bytes, "xyd:", 4) != 0) return FALSE;
+    }
+  }
   // Give Flutter, including plugins, an opportunity to handle window messages.
   if (flutter_controller_) {
     std::optional<LRESULT> result =

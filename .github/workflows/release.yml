@@ -35,6 +35,7 @@ jobs:
       - run: flutter pub get
       - run: flutter analyze --no-pub
       - run: flutter test --no-pub
+      - run: node --test server/test/*.test.mjs
 
   android:
     name: Android release ${{ matrix.abi }}
@@ -46,16 +47,16 @@ jobs:
         include:
           - abi: arm32
             flutter_arch: arm
-            artifact: android-arm32-apk
+            artifact: XY加密-Android-armeabi-v7a
           - abi: arm64
             flutter_arch: arm64
-            artifact: android-arm64-apk
+            artifact: XY加密-Android-arm64-v8a
           - abi: x86_64
             flutter_arch: x64
-            artifact: android-x86_64-apk
+            artifact: XY加密-Android-x86_64
           - abi: all
             flutter_arch: all
-            artifact: android-all-apk
+            artifact: XY加密-Android-all
     steps:
       - uses: actions/checkout@v4
       - uses: subosito/flutter-action@v2
@@ -101,7 +102,7 @@ jobs:
         run: mv build/app/outputs/flutter-apk/app-release.apk "${{ matrix.artifact }}.apk"
       - uses: actions/upload-artifact@v4
         with:
-          name: release-${{ matrix.artifact }}
+          name: ${{ matrix.artifact }}
           path: ${{ matrix.artifact }}.apk
 
   windows:
@@ -154,7 +155,7 @@ jobs:
           arch: ${{ matrix.vs_arch }}
       - name: Install Inno Setup
         shell: pwsh
-        run: choco install innosetup --no-progress -y
+        run: choco install innosetup --version=6.7.1 --allow-downgrade --no-progress -y
       - run: node tool/build_legal_site.cjs
       - run: flutter pub get
       - name: Build Release Windows bundle
@@ -177,7 +178,7 @@ jobs:
           $bundle = "build/windows/${{ matrix.flutter_arch }}/runner/Release"
           if (!(Test-Path $bundle)) { throw "Windows bundle not found: $bundle" }
           New-Item -ItemType Directory -Force -Path ci-dist | Out-Null
-          Compress-Archive -Path "$bundle\*" -DestinationPath "ci-dist/XY-Crypto-windows-${{ matrix.arch }}-portable.zip" -Force
+          Compress-Archive -Path "$bundle\*" -DestinationPath "ci-dist/XY加密-Windows-${{ matrix.arch }}.zip" -Force
       - name: Build setup.exe
         shell: pwsh
         run: |
@@ -189,7 +190,7 @@ jobs:
           & "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe" packaging/windows/xy_encrypt_app.iss
       - uses: actions/upload-artifact@v4
         with:
-          name: release-windows-${{ matrix.arch }}
+          name: XY加密-Windows-${{ matrix.arch }}
           path: ci-dist/*
 
   linux:
@@ -252,7 +253,7 @@ jobs:
           APP_VERSION="${{ env.APP_VERSION }}" bash packaging/linux/build-packages.sh "$bundle" ci-dist "${{ matrix.deb_arch }}"
       - uses: actions/upload-artifact@v4
         with:
-          name: release-linux-${{ matrix.arch }}
+          name: XY加密-Linux-${{ matrix.arch }}
           path: ci-dist/*
 
   apple:
@@ -272,19 +273,20 @@ jobs:
         run: flutter build ios --release --no-codesign --no-pub
       - name: Build Release macOS archive
         run: flutter build macos --release --no-pub
-      - name: Package Apple release archives
+      - name: Package Apple archives with detected architecture
+        id: apple_packages
         shell: bash
-        run: |
-          set -eux
-          mkdir -p ci-dist
-          ios_app=$(find build/ios/iphoneos -maxdepth 1 -name '*.app' -print -quit)
-          tar -C "$(dirname "$ios_app")" -czf ci-dist/XY-Crypto-ios-release-unsigned.tar.gz "$(basename "$ios_app")"
-          mac_app=$(find build/macos/Build/Products/Release -maxdepth 1 -name '*.app' -print -quit)
-          ditto -c -k --sequesterRsrc --keepParent "$mac_app" ci-dist/XY-Crypto-macos-release-unsigned.zip
+        run: bash packaging/apple/build-archives.sh ci-dist
       - uses: actions/upload-artifact@v4
         with:
-          name: release-apple
-          path: ci-dist/*
+          name: ${{ steps.apple_packages.outputs.ios_name }}
+          path: ci-dist/${{ steps.apple_packages.outputs.ios_name }}.tar.gz
+          if-no-files-found: error
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ${{ steps.apple_packages.outputs.macos_name }}
+          path: ci-dist/${{ steps.apple_packages.outputs.macos_name }}.zip
+          if-no-files-found: error
 
   publish:
     name: Publish stable GitHub Release

@@ -8,7 +8,7 @@ ARCH=${3:?Debian architecture is required}
 APP_NAME=xy-encrypt-app
 VERSION=1.3.1-1
 PACKAGE_ROOT="${OUTPUT_DIR}/${APP_NAME}-${ARCH}-pkg"
-DEB_PATH="${OUTPUT_DIR}/XY-Crypto-linux-${ARCH}.deb"
+DEB_PATH="${OUTPUT_DIR}/XY加密-Linux-${ARCH}.deb"
 
 rm -rf "${PACKAGE_ROOT}" "${DEB_PATH}"
 mkdir -p \
@@ -42,8 +42,8 @@ Priority: optional
 Architecture: ${ARCH}
 Maintainer: XY加密 <hujiayucc@qq.com>
 Depends: libgtk-3-0, libglib2.0-0, libsecret-1-0, libstdc++6, liblzma5
-Description: XY加密 text encoding and encryption utility
- A Flutter desktop application for local text encoding and encryption.
+Description: XY加密：文本编码与加解密工具
+ 在本地进行文本编码、加密、解密及分享内容导入。
 EOF
 
 # dpkg-deb requires the metadata directory to be traversable by all users.

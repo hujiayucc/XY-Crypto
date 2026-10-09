@@ -20,6 +20,8 @@ abstract final class ShareCodec {
   static const scheme = 'xyd';
   static const host = 'share';
   static const legacyHost = 'app.hujiayucc.cn';
+  static const webShareBase = 'https://app.hujiayucc.cn/share';
+
   static const maxPayloadLength = 5000;
   static const encryptOperation = 'encrypt';
   static const decryptOperation = 'decrypt';
@@ -56,6 +58,29 @@ abstract final class ShareCodec {
     }
     return Uri(scheme: scheme, host: host, queryParameters: parameters);
   }
+  static Uri encodeWebUrl(Uri deepLink) {
+    if (!_isSupportedUri(deepLink) || deepLink.scheme != scheme) {
+      throw const FormatException('分享链接格式无效');
+    }
+    final webUri = Uri.parse('$webShareBase#${Uri.encodeComponent(deepLink.toString())}');
+    if (webUri.toString().length > 8192) {
+      throw const FormatException('分享链接过长');
+    }
+    return webUri;
+  }
+
+  static Uri encodeWebShare(
+    CryptoMode mode,
+    String output, {
+    String? key,
+    String? operation,
+  }) => encodeWebUrl(encode(
+        mode,
+        output,
+        key: key,
+        operation: operation,
+      ));
+
 
   static String composeMessage(Uri uri) => '我分享了一个加密文，点击导入：\n${uri.toString()}';
 
@@ -74,11 +99,32 @@ abstract final class ShareCodec {
 
   static String? findShareLink(String text) {
     final trimmed = text.trim();
+    final website = Uri.tryParse(trimmed);
+    if (website != null &&
+        website.scheme == 'https' &&
+        website.host == legacyHost &&
+        website.path == '/share' &&
+        website.fragment.isNotEmpty) {
+      final fragment = website.fragment;
+      if (isShareLink(fragment)) return fragment;
+      final decoded = Uri.decodeComponent(fragment);
+      if (isShareLink(decoded)) return decoded;
+    }
     final match = RegExp(
-      r'(?:xyd://share\?[^\s]+|https://app\.hujiayucc\.cn(?:/)?\?[^\s]+)',
+      r'(?:xyd://share\?[^\s]+|https://app\.hujiayucc\.cn/share#[^\s]+|https://app\.hujiayucc\.cn(?:/)?\?[^\s]+)',
     ).firstMatch(trimmed);
     if (match != null) {
-      return match.group(0)!.replaceFirst(_trailingPunctuation, '');
+      final value = match.group(0)!.replaceFirst(_trailingPunctuation, '');
+      final embeddedWebsite = Uri.tryParse(value);
+      if (embeddedWebsite != null &&
+          embeddedWebsite.path == '/share' &&
+          embeddedWebsite.fragment.isNotEmpty) {
+        final fragment = embeddedWebsite.fragment;
+        if (isShareLink(fragment)) return fragment;
+        final decoded = Uri.decodeComponent(fragment);
+        if (isShareLink(decoded)) return decoded;
+      }
+      return value;
     }
     if (isShareLink(trimmed)) return trimmed;
     return null;

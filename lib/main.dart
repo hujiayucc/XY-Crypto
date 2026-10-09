@@ -33,14 +33,17 @@ class _XyAppState extends State<XyApp> {
   static const _splashDuration = Duration(seconds: 2);
   final _controller = HomeController();
   final _messenger = GlobalKey<ScaffoldMessengerState>();
+  final _navigator = GlobalKey<NavigatorState>();
   AppLinks? _links;
   late final PrivacyRuntime _privacy =
       widget.privacyRuntime ?? PrivacyRuntime();
   bool _servicesStarted = false;
   int _consentEpoch = 0;
   late final IncomingShareService _incomingShare;
-  StreamSubscription<Uri>? _subscription;
-  String? _lastImported;
+  StreamSubscription<String>? _subscription;
+  Future<void> _importQueue = Future<void>.value();
+  String? _pendingExternalLink;
+  String? _pendingMessage;
   bool _showSplash = true;
   bool _legalAccepted = false;
   bool _checkingLegal = true;
@@ -50,6 +53,10 @@ class _XyAppState extends State<XyApp> {
   void initState() {
     super.initState();
     _incomingShare = IncomingShareService(onText: _importText);
+    if (!_privacy.android) {
+      // Keep raw OS events in memory until consent; parse/import them afterwards.
+      _listenExternalLinks();
+    }
     _loadLegalConsent();
     _splashTimer = Timer(_splashDuration, () {
       if (!mounted) return;
@@ -57,6 +64,13 @@ class _XyAppState extends State<XyApp> {
         SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
       }
       setState(() => _showSplash = false);
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted && _legalAccepted && _pendingMessage != null) {
+          final message = _pendingMessage!;
+          _pendingMessage = null;
+          _message(message);
+        }
+      });
     });
   }
 
@@ -87,14 +101,13 @@ class _XyAppState extends State<XyApp> {
   }
 
   Future<void> _withdrawLegalConsent() async {
-    await _privacy.revoke();
     _legalAccepted = false;
     _consentEpoch++;
-    await _subscription?.cancel();
-    _subscription = null;
-    _incomingShare.dispose();
+    await _privacy.revoke();
+    _pendingExternalLink = null;
+    _pendingMessage = null;
+    await _incomingShare.stop();
     _servicesStarted = false;
-    _lastImported = null;
     _controller.clearSessionData();
     if (!mounted) return;
     _messenger.currentState?.clearSnackBars();
@@ -107,52 +120,106 @@ class _XyAppState extends State<XyApp> {
     _servicesStarted = true;
     if (_privacy.android) {
       unawaited(_incomingShare.start());
-    } else {
-      _links ??= AppLinks();
-      _subscription = _links!.uriLinkStream.listen(
-        _importLink,
-        onError: (Object error) => _message('链接导入暂未就绪'),
-      );
-      unawaited(_initialLink());
+      return;
     }
+    final pending = _pendingExternalLink;
+    _pendingExternalLink = null;
+    if (pending != null) unawaited(_importExternalLink(pending));
   }
 
-  Future<void> _initialLink() async {
-    final epoch = _consentEpoch;
-    try {
-      final uri = await _links?.getInitialLink();
-      if (mounted && _legalAccepted && epoch == _consentEpoch && uri != null) {
-        await _importLink(uri);
+  void _listenExternalLinks() {
+    _links ??= AppLinks();
+    // The stream supplies both the initial link and subsequent activations.
+    // Calling getInitialLink as well can replay an old URI over a newer one.
+    _subscription = _links!.stringLinkStream.listen(
+      (raw) {
+        if (!_legalAccepted) {
+          _pendingExternalLink = raw;
+        } else {
+          unawaited(_importExternalLink(raw));
+        }
+      },
+      onError: (Object error) {
+        if (mounted && _legalAccepted) _message('链接监听未就绪');
+      },
+    );
+  }
+
+  void _message(String text) {
+    // Always wait for the current navigation/consent frame to install its Scaffold.
+    _pendingMessage = text;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted || _checkingLegal || !_legalAccepted || _showSplash) return;
+      final pending = _pendingMessage;
+      _pendingMessage = null;
+      if (pending != null) {
+        _messenger.currentState?.showSnackBar(SnackBar(content: Text(pending)));
       }
-    } catch (_) {
-      if (_legalAccepted) _message('链接监听未就绪');
-    }
+    });
+    WidgetsBinding.instance.ensureVisualUpdate();
   }
 
-  void _message(String text) =>
-      _messenger.currentState?.showSnackBar(SnackBar(content: Text(text)));
-  Future<void> _importLink(Uri uri) => _importText(uri.toString());
+  Future<void> _importExternalLink(String text) =>
+      _enqueueImport(text, uriOnly: true);
 
-  Future<void> _importText(String text) async {
+  Future<void> _importText(String text) => _enqueueImport(text,
+      uriOnly: text.trim().toLowerCase().startsWith('xyd:'));
+
+  Future<void> _enqueueImport(String text, {required bool uriOnly}) {
+    final epoch = _consentEpoch;
+    _importQueue = _importQueue.then((_) async {
+      if (!mounted || !_legalAccepted || epoch != _consentEpoch) return;
+      await _applyIncoming(text, uriOnly: uriOnly);
+    });
+    return _importQueue;
+  }
+
+  Future<void> _applyIncoming(String text, {required bool uriOnly}) async {
     if (!mounted || !_legalAccepted) return;
     final epoch = _consentEpoch;
     final trimmed = text.trim();
-    if (trimmed.isEmpty || trimmed == _lastImported) return;
+    if (trimmed.isEmpty) return;
     try {
       final link = ShareCodec.findShareLink(trimmed);
+      if (uriOnly && !ShareCodec.isShareLink(trimmed)) {
+        _message('未识别到有效的 XY 分享链接');
+        return;
+      }
+      // Validate before dismissing the current route or changing the editor.
+      if (link != null) ShareCodec.decode(link);
+      _navigator.currentState?.popUntil((route) => route.isFirst);
       final imported = await _controller.importText(
         link ?? trimmed,
-        allowPlainText: link == null,
+        allowPlainText: !uriOnly && link == null,
       );
       if (!mounted || !_legalAccepted || epoch != _consentEpoch) return;
       if (!imported) {
         _message('未识别到有效的 XY 分享链接');
         return;
       }
-      _lastImported = trimmed;
-      _message(link == null ? '已导入分享文本' : '分享内容已导入');
+      _splashTimer?.cancel();
+      if (_showSplash) {
+        if (Platform.isAndroid || Platform.isIOS) {
+          unawaited(
+              SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge));
+        }
+        setState(() => _showSplash = false);
+      }
+      _navigator.currentState?.popUntil((route) => route.isFirst);
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted && _legalAccepted && epoch == _consentEpoch) {
+          _message(_controller.statusMessage ??
+              (link == null ? '已导入分享文本' : '分享内容已导入'));
+        }
+      });
     } on FormatException catch (error) {
-      _message(error.message);
+      if (mounted && _legalAccepted && epoch == _consentEpoch) {
+        _message(error.message);
+      }
+    } catch (_) {
+      if (mounted && _legalAccepted && epoch == _consentEpoch) {
+        _message('分享导入失败，请重试');
+      }
     }
   }
 
@@ -170,6 +237,7 @@ class _XyAppState extends State<XyApp> {
         title: 'XY加密',
         debugShowCheckedModeBanner: false,
         scaffoldMessengerKey: _messenger,
+        navigatorKey: _navigator,
         theme: AppTheme.light(),
         darkTheme: AppTheme.dark(),
         themeMode: ThemeMode.system,

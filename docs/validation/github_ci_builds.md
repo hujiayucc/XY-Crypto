@@ -6,11 +6,17 @@
 
 ## 产物
 
-- Android：`android-arm32-apk`、`android-arm64-apk`、`android-x86_64-apk`、`android-all-apk`
-- Windows amd64/arm64：绿色版 `*-portable.zip` 与 Inno Setup `*-setup.exe`
-- Linux amd64/arm64：可直接运行的 `*-portable.tar.gz`、`*-portable.tar.xz`，以及 Debian `*.deb`、RPM `*.rpm`、Arch `*.pkg.tar.zst`
-- iOS：未签名 `XY-Crypto-ios-unsigned.tar.gz`
-- macOS：未签名 `XY-Crypto-macos-unsigned.zip`
+CI Preview 与正式 Release 统一使用 `XY加密-平台-架构.文件扩展名`。文件名不附加版本、portable、setup、unsigned 或 release；安装包和便携包以扩展名区分，签名状态仍见下方说明。
+
+架构字段遵循各平台原有命名：Android 使用 ABI `armeabi-v7a`、`arm64-v8a`、`x86_64`（通用包为 `all`）；Windows/Linux 保留现有 `amd64`、`arm64`。构建矩阵内部的 Flutter 参数保持原值，仅调整发布文件名。
+
+- Android：`XY加密-Android-armeabi-v7a.apk`、`XY加密-Android-arm64-v8a.apk`、`XY加密-Android-x86_64.apk`、`XY加密-Android-all.apk`（all 为通用 APK）。
+- Windows amd64/arm64：`XY加密-Windows-<架构>.zip`（便携版）与 `XY加密-Windows-<架构>.exe`（安装程序）。
+- Linux amd64/arm64：`XY加密-Linux-<架构>.deb`、`.rpm`、`.pkg.tar.zst`，以及便携版 `.tar.gz`、`.tar.xz`。
+- iOS：`XY加密-iOS-<架构>.tar.gz`，仍为未签名 app 归档。
+- macOS：`XY加密-macOS-<架构>.zip`，仍为未签名 app 归档。
+
+Apple 打包脚本从 app 的 Info.plist 获取可执行文件并用 `lipo -archs` 读取实际架构：arm64 使用 `arm64`，x86_64 保留 `x86_64`，同时包含两者使用 `universal`。例如 `XY加密-iOS-arm64.tar.gz`、`XY加密-macOS-universal.zip`。两个 Apple 平台分别上传 artifact，发布时与其他平台附件一并汇总。
 
 Windows 和 Linux 的架构使用矩阵分别构建，不把不同架构混入同一个包。Windows amd64 使用 x64 runner，Windows ARM64 使用 `windows-11-arm` runner；两者均直接运行对应架构的 Flutter Release 构建。Windows 绿色版解压后直接运行 `xy_encrypt_app.exe`。Linux amd64/arm64 使用对应 GitHub runner；portable 包解压后运行 bundle 内的 `xy_encrypt_app`，Debian/RPM/Arch 包分别负责对应发行版的安装入口、desktop 文件和图标注册。
 
@@ -45,3 +51,12 @@ Windows 和 Linux 的架构使用矩阵分别构建，不把不同架构混入�
 - Linux/Windows ARM64 源码 SDK 显式建立 `bin/cache`、原生 Dart SDK 链接及 engine 标记；CMake 与命令行使用相同的 SDK 内 Flutter 入口。PowerShell 对原生命令检查退出码。
 - Debian 控制目录和 control 文件分别设置为 755 和 644，兼容严格的 umask。
 - 运行 `37898146213` 已验证 Linux 两架构与 Apple，并上传 Windows amd64 产物；Windows ARM64 当时仍使用旧 SDK，404 后按上述版本配对继续验证。完整 CI 成功与 Preview 发布以最新运行最终结论为准。
+
+
+## 安装界面语言
+
+- Windows 安装版固定使用简体中文，包括安装向导、下一步/返回/取消按钮、路径选择、快捷方式、完成页与卸载提示；英文系统也使用中文。脚本仅启用 `chinesesimplified`，关闭语言选择和旧安装语言继承。
+- Inno Setup 编译器锁定 6.7.1，中文语言文件随仓库保存于 `packaging/windows/Languages/ChineseSimplified.isl`；语言资源完整性已与该版本默认消息表逐项核对。`.iss` 与 `.isl` 使用 UTF-8 BOM，避免英文 runner 误读中文。
+- Windows 安装程序属性和应用版本资源使用中文名称/说明；Linux Debian、RPM、Arch 包的应用简介及 desktop 说明使用中文。
+- Linux 包管理器以及 Android/iOS/macOS 系统安装界面的按钮、系统安全提示由操作系统语言决定；当前 Apple 产物是 app 归档，没有自定义安装向导。
+- 便携 ZIP、tar.gz、tar.xz 直接解压运行，无安装向导。协议注册、既定产物命名和架构保持一致。

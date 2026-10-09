@@ -1,0 +1,12 @@
+services:
+  xy-encrypt-server:
+    build: .
+    ports:
+      - "8787:8787"
+    environment:
+      HOST: 0.0.0.0
+      PORT: 8787
+      RELEASE_REPO: ${RELEASE_REPO:-}
+      GITHUB_TOKEN: ${GITHUB_TOKEN:-}
+      RELEASE_MANIFEST: ${RELEASE_MANIFEST:-}
+    restart: unless-stopped

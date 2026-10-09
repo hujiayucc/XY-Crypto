@@ -4,6 +4,7 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:share_plus/share_plus.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:zxing2/qrcode.dart';
 import '../../core/crypto_engine.dart';
 import '../../core/scan_picker.dart';
@@ -43,6 +44,9 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+  static const _websiteBase = 'https://app.hujiayucc.cn';
+  static const _appVersion = '1.3.1';
+  static const _appBuild = 180;
   late final EmojiTextEditingController _input;
   late final EmojiTextEditingController _output;
   bool _keyDialogOpen = false;
@@ -536,6 +540,7 @@ class _HomePageState extends State<HomePage> {
     final shareOptions = await _askShareOptions();
     if (!mounted || shareOptions == null) return;
     late final Uri uri;
+    late final Uri webUri;
     try {
       uri = ShareCodec.encode(
         model.shareMode,
@@ -545,6 +550,7 @@ class _HomePageState extends State<HomePage> {
             ? model.shareKey
             : null,
       );
+      webUri = ShareCodec.encodeWebUrl(uri);
     } on FormatException catch (error) {
       _message(error.message);
       return;
@@ -562,7 +568,7 @@ class _HomePageState extends State<HomePage> {
           ListTile(
             leading: const Icon(Icons.link),
             title: const Text('复制链接'),
-            subtitle: const Text('复制 xyd 分享链接'),
+            subtitle: const Text('复制网站分享链接'),
             onTap: () => Navigator.pop(sheetContext, _ShareAction.copyLink),
           ),
           ListTile(
@@ -577,11 +583,11 @@ class _HomePageState extends State<HomePage> {
     if (!mounted || action == null) return;
     switch (action) {
       case _ShareAction.system:
-        await _shareSystem(uri);
+        await _shareSystem(webUri);
       case _ShareAction.copyLink:
-        await _copyShareLink(uri);
+        await _copyShareLink(webUri);
       case _ShareAction.qr:
-        await _showShareQr(uri);
+        await _showShareQr(webUri);
     }
   }
 
@@ -669,6 +675,71 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
+  Future<void> _checkForUpdate() async {
+    _message('正在检查更新…');
+    final platform = Platform.isAndroid
+        ? 'android'
+        : Platform.isWindows
+            ? 'windows'
+            : Platform.isLinux
+                ? 'linux'
+                : Platform.isIOS
+                    ? 'ios'
+                    : Platform.isMacOS
+                        ? 'macos'
+                        : '';
+    final query = <String, String>{
+      'channel': 'stable',
+      'version': _appVersion,
+      'build': _appBuild.toString(),
+      if (platform.isNotEmpty) 'platform': platform,
+    };
+    final updateUri = Uri.parse('$_websiteBase/api/update').replace(queryParameters: query);
+    final client = HttpClient();
+    try {
+      final request = await client.getUrl(updateUri);
+      request.headers.set(HttpHeaders.acceptHeader, 'application/json');
+      final response = await request.close();
+      final body = await response.transform(utf8.decoder).join();
+      if (response.statusCode != HttpStatus.ok) {
+        throw const FormatException('更新服务暂时不可用');
+      }
+      final data = jsonDecode(body) as Map<String, dynamic>;
+      if (!mounted) return;
+      final available = data['available'] == true;
+      final release = data['release'] as Map<String, dynamic>?;
+      final version = release?['version']?.toString() ?? '';
+      final assets = (release?['assets'] as List<dynamic>?) ?? const [];
+      await showDialog<void>(
+        context: context,
+        builder: (dialogContext) => AlertDialog(
+          title: Text(available ? '发现新版本 $version' : '已是最新版本'),
+          content: Text(available
+              ? '检测到 $version，共有 ${assets.length} 个适配当前平台的安装包。打开网站查看下载。'
+              : '当前版本 $_appVersion（$_appBuild）已经是最新版本。'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(dialogContext),
+              child: const Text('关闭'),
+            ),
+            if (available)
+              FilledButton(
+                onPressed: () async {
+                  Navigator.pop(dialogContext);
+                  await launchUrl(Uri.parse('$_websiteBase/#downloads'), mode: LaunchMode.externalApplication);
+                },
+                child: const Text('打开下载页'),
+              ),
+          ],
+        ),
+      );
+    } catch (error) {
+      if (mounted) _message('更新检测失败：$error');
+    } finally {
+      client.close(force: true);
+    }
+  }
+
   Future<void> _pasteShare() async {
     try {
       final data = await Clipboard.getData(Clipboard.kTextPlain);
@@ -719,7 +790,7 @@ class _HomePageState extends State<HomePage> {
       case 'pasteShare':
         _pasteShare();
       case 'update':
-        _message('当前为开发预览版，更新服务尚未配置');
+        _checkForUpdate();
       case 'agreement':
         _openLegalDocument(privacy: false);
       case 'privacy':
