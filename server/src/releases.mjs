@@ -61,7 +61,7 @@ export function normalizePlatform(value) {
 }
 
 function normalizeAsset(asset) {
-  const name = asset?.name;
+  const name = asset?.label ?? asset?.name;
   const parsed = parseAssetName(name);
   if (!parsed || (asset?.state && asset.state !== 'uploaded')) return null;
 

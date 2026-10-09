@@ -18,6 +18,11 @@ test('keeps the published platform and architecture names', () => {
   });
   assert.equal(parseAssetName('XY加密-Linux-arm64.pkg.tar.zst').platform, 'linux');
   assert.equal(parseAssetName('debug.apk'), null);
+  const labelled = normalizeRelease({
+    tag_name: 'v1.3.1',
+    assets: [{ label: 'XY加密-Android-arm64-v8a.apk', name: 'XY.-Android-arm64-v8a.apk', browser_download_url: 'https://example.test/app.apk', state: 'uploaded' }],
+  });
+  assert.equal(labelled.assets[0].name, 'XY加密-Android-arm64-v8a.apk');
 });
 
 test('sorts stable and preview semver correctly', () => {
