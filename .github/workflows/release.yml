@@ -172,6 +172,13 @@ jobs:
           $expected = if ('${{ matrix.arch }}' -eq 'arm64') { 0xAA64 } else { 0x8664 }
           if ($machine -ne $expected) { throw ('Unexpected PE machine: 0x{0:X4}' -f $machine) }
           Write-Host ('Verified ${{ matrix.arch }} executable: PE machine 0x{0:X4}' -f $machine)
+      - name: Sign Windows executable
+        shell: pwsh
+        env:
+          WINDOWS_SIGNING_CERTIFICATE_BASE64: ${{ secrets.WINDOWS_SIGNING_CERTIFICATE_BASE64 }}
+          WINDOWS_SIGNING_CERTIFICATE_PASSWORD: ${{ secrets.WINDOWS_SIGNING_CERTIFICATE_PASSWORD }}
+          WINDOWS_SIGNING_TIMESTAMP_URL: ${{ vars.WINDOWS_SIGNING_TIMESTAMP_URL }}
+        run: pwsh -File tool/sign_windows.ps1 "${{ github.workspace }}\build\windows\${{ matrix.flutter_arch }}\runner\Release\xy_encrypt_app.exe"
       - name: Package portable ZIP
         shell: pwsh
         run: |
@@ -188,6 +195,13 @@ jobs:
           $env:OUTPUT_DIR = "${{ github.workspace }}\ci-dist"
           $env:ARCH_LABEL = '${{ matrix.arch }}'
           & "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe" packaging/windows/xy_encrypt_app.iss
+      - name: Sign Windows installer
+        shell: pwsh
+        env:
+          WINDOWS_SIGNING_CERTIFICATE_BASE64: ${{ secrets.WINDOWS_SIGNING_CERTIFICATE_BASE64 }}
+          WINDOWS_SIGNING_CERTIFICATE_PASSWORD: ${{ secrets.WINDOWS_SIGNING_CERTIFICATE_PASSWORD }}
+          WINDOWS_SIGNING_TIMESTAMP_URL: ${{ vars.WINDOWS_SIGNING_TIMESTAMP_URL }}
+        run: pwsh -File tool/sign_windows.ps1 "${{ github.workspace }}\ci-dist\XY加密-Windows-${{ matrix.arch }}.exe"
       - uses: actions/upload-artifact@v4
         with:
           name: XY加密-Windows-${{ matrix.arch }}

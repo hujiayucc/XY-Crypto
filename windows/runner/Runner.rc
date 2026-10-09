@@ -89,11 +89,11 @@ BEGIN
     BEGIN
         BLOCK "080404b0"
         BEGIN
-            VALUE "CompanyName", "XY加密" "\0"
+            VALUE "CompanyName", "胡佳宇" "\0"
             VALUE "FileDescription", "XY加密" "\0"
             VALUE "FileVersion", VERSION_AS_STRING "\0"
             VALUE "InternalName", "XY加密" "\0"
-            VALUE "LegalCopyright", "版权所有 (C) 2026 XY加密。保留所有权利。" "\0"
+            VALUE "LegalCopyright", "版权所有 (C) 2026 胡佳宇。保留所有权利。" "\0"
             VALUE "OriginalFilename", "xy_encrypt_app.exe" "\0"
             VALUE "ProductName", "XY加密" "\0"
             VALUE "ProductVersion", VERSION_AS_STRING "\0"
