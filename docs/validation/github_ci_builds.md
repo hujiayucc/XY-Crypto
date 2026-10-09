@@ -38,3 +38,10 @@ Windows 和 Linux 的架构使用矩阵分别构建，不把不同架构混入�
 当前 Linux job 为 amd64/arm64 分别产出可直接运行的 `.tar.gz`、`.tar.xz`，以及 Debian `.deb`、RPM `.rpm` 和 Arch `.pkg.tar.zst`。正式发布可在产物生成后使用 GPG detached signature 或 Sigstore/Cosign 签署，并把公钥或透明日志链接一并发布。
 
 `code-check.yml` 不上传 Release；`ci.yml` 手动触发后把矩阵产物发布到 `preview-ci-*` 且标记为 Preview；`release.yml` 在 `v*` 标签或手动指定标签时把所有矩阵产物汇总到正式 GitHub Release，不标记为 Preview。
+## 工具链兼容修复
+
+- 默认 Flutter 3.35.4 / Dart 3.9.2；Windows ARM64 单独锁定 Flutter 3.47.7 / Dart 3.13.5。3.35.4 对应 engine 的 `windows-arm64/artifacts.zip` 返回 404，3.47.7 的 ARM64 主机工具、C++ wrapper 和 Release engine 已通过官方存储端点核验。
+- Windows 共用 `tool/setup_flutter_windows.ps1`，3.35.4 补入 VS 2026 CMake 生成器映射，已有该映射的新 SDK 保持其映射；打包前检查 EXE 的 PE Machine（amd64 `0x8664`，arm64 `0xAA64`）。
+- Linux/Windows ARM64 源码 SDK 显式建立 `bin/cache`、原生 Dart SDK 链接及 engine 标记；CMake 与命令行使用相同的 SDK 内 Flutter 入口。PowerShell 对原生命令检查退出码。
+- Debian 控制目录和 control 文件分别设置为 755 和 644，兼容严格的 umask。
+- 运行 `37898146213` 已验证 Linux 两架构与 Apple，并上传 Windows amd64 产物；Windows ARM64 当时仍使用旧 SDK，404 后按上述版本配对继续验证。完整 CI 成功与 Preview 发布以最新运行最终结论为准。

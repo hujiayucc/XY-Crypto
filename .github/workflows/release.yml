@@ -117,18 +117,22 @@ jobs:
             flutter_arch: x64
             vs_arch: x64
             custom_flutter: false
+            flutter_version: 3.35.4
+            dart_version: 3.9.2
           - arch: arm64
             runner: windows-11-arm
             flutter_arch: arm64
             vs_arch: arm64
             custom_flutter: true
+            flutter_version: 3.47.7
+            dart_version: 3.13.5
     steps:
       - uses: actions/checkout@v4
       - name: Set up Flutter x64
         if: ${{ !matrix.custom_flutter }}
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: ${{ env.FLUTTER_VERSION }}
+          flutter-version: ${{ matrix.flutter_version }}
           channel: stable
           cache: true
       - name: Use Flutter source tool on Windows
@@ -139,12 +143,12 @@ jobs:
         if: ${{ matrix.custom_flutter }}
         uses: dart-lang/setup-dart@v1
         with:
-          sdk: ${{ env.DART_VERSION }}
+          sdk: ${{ matrix.dart_version }}
           architecture: arm64
       - name: Set up Flutter ARM64
         if: ${{ matrix.custom_flutter }}
         shell: pwsh
-        run: pwsh -File tool/setup_flutter_windows_arm64.ps1 $env:FLUTTER_VERSION $env:DART_VERSION
+        run: pwsh -File tool/setup_flutter_windows_arm64.ps1 ${{ matrix.flutter_version }} ${{ matrix.dart_version }}
       - uses: ilammy/msvc-dev-cmd@v1
         with:
           arch: ${{ matrix.vs_arch }}
@@ -156,6 +160,17 @@ jobs:
       - name: Build Release Windows bundle
         shell: pwsh
         run: flutter build windows --release --no-pub
+      - name: Verify Windows executable architecture
+        shell: pwsh
+        run: |
+          $exe = "build/windows/${{ matrix.flutter_arch }}/runner/Release/xy_encrypt_app.exe"
+          $bytes = [System.IO.File]::ReadAllBytes((Join-Path $PWD $exe))
+          $peOffset = [BitConverter]::ToInt32($bytes, 0x3c)
+          if ([BitConverter]::ToUInt32($bytes, $peOffset) -ne 0x4550) { throw 'Invalid PE signature' }
+          $machine = [BitConverter]::ToUInt16($bytes, $peOffset + 4)
+          $expected = if ('${{ matrix.arch }}' -eq 'arm64') { 0xAA64 } else { 0x8664 }
+          if ($machine -ne $expected) { throw ('Unexpected PE machine: 0x{0:X4}' -f $machine) }
+          Write-Host ('Verified ${{ matrix.arch }} executable: PE machine 0x{0:X4}' -f $machine)
       - name: Package portable ZIP
         shell: pwsh
         run: |
