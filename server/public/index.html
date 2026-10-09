@@ -4,18 +4,16 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="description" content="XY加密，跨平台的文本编码与加解密工具。">
+  <link rel="icon" type="image/png" href="/app-icon.png">
   <title>XY加密 · 简洁、私密、跨平台</title>
   <link rel="stylesheet" href="/styles.css">
-  <script src="/app.js" defer></script>
+  <!-- Client update detection uses /api/update; no update UI is rendered here. -->
 </head>
 <body>
   <header class="site-header">
-    <a class="brand" href="/" aria-label="XY加密首页"><span class="brand-mark">XY</span><span>XY加密</span></a>
+    <a class="brand" href="/" aria-label="XY加密首页"><span class="brand-mark"><img src="/app-icon.png" alt="XY加密"></span><span>XY加密</span></a>
     <nav class="nav-links" aria-label="主导航">
       <a href="#features">特性</a>
-      <a href="#downloads">下载</a>
-      <a href="#updates">更新</a>
-      <a class="nav-button" href="https://github.com/hujiayucc/XY-Crypto" rel="noreferrer">项目主页</a>
     </nav>
   </header>
 
@@ -60,17 +58,11 @@
       </div>
     </section>
 
-    <section id="downloads" class="download-section section-shell">
-      <div class="section-heading split-heading"><div><p class="eyebrow">获取应用</p><h2>选择你的设备。</h2></div><div class="channel-switch" role="group" aria-label="版本通道"><button class="channel-button active" data-channel="stable">稳定版</button><button class="channel-button" data-channel="preview">Preview</button></div></div>
-      <div id="release-status" class="inline-status" role="status">正在读取最新版本…</div>
-      <div id="download-grid" class="download-grid" aria-live="polite"></div>
-    </section>
+<!-- Downloads remain available from the share fallback page. -->
 
-    <section id="updates" class="update-section section-shell">
-      <div class="update-panel"><div><p class="eyebrow">版本检测</p><h2>保持在最新状态。</h2><p>输入当前版本，检查是否有适合你设备的更新。</p></div><form id="update-form" class="update-form"><label>当前版本<input name="version" value="1.3.1" pattern="[0-9]+\.[0-9]+\.[0-9]+.*" required></label><label>构建号<input name="build" type="number" value="180" min="0"></label><label>平台<select name="platform"><option value="android">Android</option><option value="windows">Windows</option><option value="linux">Linux</option><option value="ios">iOS</option><option value="macos">macOS</option></select></label><button class="button button-dark" type="submit">检查更新 <span aria-hidden="true">→</span></button></form><div id="update-result" class="update-result" role="status"></div></div>
-    </section>
+    <!-- Update detection is exposed through /api/update for clients. -->
   </main>
 
-  <footer class="site-footer section-shell"><a class="brand" href="/"><span class="brand-mark">XY</span><span>XY加密</span></a><span>本地处理，清晰分享。</span><a href="/share" class="footer-link">分享入口 ↗</a></footer>
+  <footer class="site-footer section-shell"><a class="brand" href="/"><span class="brand-mark"><img src="/app-icon.png" alt="XY加密"></span><span>XY加密</span></a><span>本地处理，清晰分享。</span><a href="/share" class="footer-link">分享入口 ↗</a></footer>
 </body>
 </html>

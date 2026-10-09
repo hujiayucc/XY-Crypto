@@ -5,8 +5,8 @@
 [Setup]
 AppId={{2F4B6A4B-4C8D-4A78-9B9B-131180C0DE01}}
 AppName=XY加密
-AppVersion=1.3.1
-AppVerName=XY加密 1.3.1
+AppVersion=1.3.2
+AppVerName=XY加密 1.3.2
 AppPublisher=XY加密
 VersionInfoDescription=XY加密安装程序
 VersionInfoProductName=XY加密

@@ -45,8 +45,8 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   static const _websiteBase = 'https://app.hujiayucc.cn';
-  static const _appVersion = '1.3.1';
-  static const _appBuild = 180;
+  static const _appVersion = '1.3.2';
+  static const _appBuild = 181;
   late final EmojiTextEditingController _input;
   late final EmojiTextEditingController _output;
   bool _keyDialogOpen = false;

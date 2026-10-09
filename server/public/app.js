@@ -51,26 +51,7 @@ async function loadDownloads(channel = activeChannel) {
   }
 }
 
-async function checkUpdate(event) {
-  event.preventDefault();
-  const form = event.currentTarget;
-  const result = document.querySelector('#update-result');
-  const params = new URLSearchParams(new FormData(form));
-  params.set('channel', activeChannel);
-  if (result) result.textContent = '正在检查…';
-  try {
-    const response = await fetch(`/api/update?${params.toString()}`, { headers: { accept: 'application/json' } });
-    const data = await response.json();
-    if (!response.ok) throw new Error(data.error || 'request failed');
-    if (data.available && data.release) {
-      result.innerHTML = `发现 ${escapeHtml(data.release.version)}，前往下载最新版本：<a class="asset-link" href="#downloads">查看安装包</a>`;
-      return;
-    }
-    result.textContent = '当前已经是最新版本。';
-  } catch {
-    if (result) result.textContent = '检查失败，请稍后重试。';
-  }
-}
+// Version detection is intentionally client-only through /api/update.
 
 document.querySelectorAll('.channel-button').forEach((button) => button.addEventListener('click', () => {
   document.querySelectorAll('.channel-button').forEach((item) => item.classList.remove('active'));

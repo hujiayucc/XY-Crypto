@@ -8,14 +8,14 @@ on:
       tag_name:
         description: GitHub Release tag to create
         required: true
-        default: v1.3.1
+        default: v1.3.2
         type: string
 
 env:
   FLUTTER_VERSION: '3.35.4'
   DART_VERSION: '3.9.2'
-  APP_VERSION: '1.3.1'
-  BUILD_NUMBER: '180'
+  APP_VERSION: '1.3.2'
+  BUILD_NUMBER: '181'
 
 permissions:
   contents: read

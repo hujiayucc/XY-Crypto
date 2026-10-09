@@ -10,10 +10,11 @@ button { cursor: pointer; }
 .section-shell { width: min(1160px, calc(100% - 48px)); margin: 0 auto; }
 .site-header { width: min(1240px, calc(100% - 48px)); height: 86px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; }
 .brand { display: inline-flex; align-items: center; gap: 10px; font-size: 16px; font-weight: 800; letter-spacing: 0; }
-.brand-mark { display: grid; place-items: center; width: 34px; height: 34px; border-radius: 10px; color: var(--dark); background: var(--mint-strong); font: 500 12px 'DM Mono', monospace; }
+.brand-mark { display: grid; place-items: center; overflow: hidden; width: 34px; height: 34px; border-radius: 10px; background: var(--mint-strong); }
+.brand-mark img { width: 100%; height: 100%; display: block; object-fit: cover; }
 .nav-links { display: flex; gap: 30px; align-items: center; color: var(--muted); font-size: 13px; font-weight: 600; }
 .nav-links a:hover, .header-back:hover, .footer-link:hover { color: var(--green); }
-.nav-button { color: var(--ink); border: 1px solid var(--line); padding: 10px 16px; border-radius: 8px; background: var(--white); }
+/* Navigation is limited to product information and downloads. */
 .hero { min-height: 540px; display: grid; grid-template-columns: 1fr .9fr; align-items: center; gap: 40px; padding: 54px 0 70px; }
 .eyebrow { margin: 0 0 20px; color: var(--green); font: 500 11px 'DM Mono', monospace; letter-spacing: .13em; text-transform: uppercase; }
 .eyebrow-dot { display: inline-block; width: 7px; height: 7px; margin: 0 8px 1px 0; border-radius: 50%; background: var(--mint-strong); }
