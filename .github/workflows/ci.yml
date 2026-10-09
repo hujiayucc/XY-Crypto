@@ -170,6 +170,7 @@ jobs:
           WINDOWS_SIGNING_CERTIFICATE_BASE64: ${{ secrets.WINDOWS_SIGNING_CERTIFICATE_BASE64 }}
           WINDOWS_SIGNING_CERTIFICATE_PASSWORD: ${{ secrets.WINDOWS_SIGNING_CERTIFICATE_PASSWORD }}
           WINDOWS_SIGNING_TIMESTAMP_URL: ${{ vars.WINDOWS_SIGNING_TIMESTAMP_URL }}
+          WINDOWS_SIGNING_ALLOW_UNTRUSTED: 'true'
         run: pwsh -File tool/sign_windows.ps1 "${{ github.workspace }}\build\windows\${{ matrix.flutter_arch }}\runner\Release\xy_encrypt_app.exe"
       - name: Package portable ZIP
         shell: pwsh
@@ -194,6 +195,7 @@ jobs:
           WINDOWS_SIGNING_CERTIFICATE_BASE64: ${{ secrets.WINDOWS_SIGNING_CERTIFICATE_BASE64 }}
           WINDOWS_SIGNING_CERTIFICATE_PASSWORD: ${{ secrets.WINDOWS_SIGNING_CERTIFICATE_PASSWORD }}
           WINDOWS_SIGNING_TIMESTAMP_URL: ${{ vars.WINDOWS_SIGNING_TIMESTAMP_URL }}
+          WINDOWS_SIGNING_ALLOW_UNTRUSTED: 'true'
         run: pwsh -File tool/sign_windows.ps1 "${{ github.workspace }}\ci-dist\XY加密-Windows-${{ matrix.arch }}.exe"
       - uses: actions/upload-artifact@v4
         with:

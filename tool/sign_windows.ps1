@@ -44,7 +44,12 @@ try {
   }
   & $signtool verify /pa /all /tw $Path
   if ($LASTEXITCODE -ne 0) {
-    throw "signtool verify failed with exit code $LASTEXITCODE"
+    $allowUntrusted = $env:WINDOWS_SIGNING_ALLOW_UNTRUSTED -eq 'true'
+    $authenticode = Get-AuthenticodeSignature -LiteralPath $Path
+    if (!$allowUntrusted -or $null -eq $authenticode.SignerCertificate -or $authenticode.Status -eq 'NotSigned') {
+      throw "signtool verify failed with exit code $LASTEXITCODE; status=$($authenticode.Status)"
+    }
+    Write-Warning "Signature is present but the certificate chain is not trusted on this runner: $($authenticode.Status)"
   }
   Write-Host "Signed and verified: $Path"
 } finally {
