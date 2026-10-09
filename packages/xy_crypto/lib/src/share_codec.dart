@@ -58,6 +58,7 @@ abstract final class ShareCodec {
     }
     return Uri(scheme: scheme, host: host, queryParameters: parameters);
   }
+
   static Uri encodeWebUrl(Uri deepLink) {
     if (!_isSupportedUri(deepLink) || deepLink.scheme != scheme) {
       throw const FormatException('分享链接格式无效');
@@ -74,15 +75,17 @@ abstract final class ShareCodec {
     String output, {
     String? key,
     String? operation,
-  }) => encodeWebUrl(encode(
-        mode,
-        output,
-        key: key,
-        operation: operation,
-      ));
+  }) => encodeWebUrl(
+        encode(
+          mode,
+          output,
+          key: key,
+          operation: operation,
+        ),
+      );
 
-
-  static String composeMessage(Uri uri) => '我分享了一个加密文，点击导入：\n${uri.toString()}';
+  static String composeMessage(Uri uri) =>
+      '我分享了一个加密文，点击导入：\n${uri.toString()}';
 
   static int encodedPayloadLength(Uri uri) {
     final payload = uri.queryParameters['text'];

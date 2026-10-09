@@ -23,6 +23,9 @@ void main() {
     expect(web.query, isEmpty);
     expect(web.toString(), contains('#xyd%3A%2F%2Fshare'));
     expect(ShareCodec.decode(Uri.decodeComponent(web.fragment)), isNotNull);
-    expect(ShareCodec.findShareLink('打开：${web.toString()}'), Uri.decodeComponent(web.fragment));
+    expect(
+      ShareCodec.findShareLink('打开：${web.toString()}'),
+      Uri.decodeComponent(web.fragment),
+    );
   });
 }

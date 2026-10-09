@@ -562,7 +562,9 @@ class _HomePageState extends State<HomePage> {
           ListTile(
             leading: const Icon(Icons.ios_share_outlined),
             title: const Text('系统分享'),
-            subtitle: Text(shareOptions.includeKey ? '包含密钥的可导入链接' : '不包含密钥'),
+            subtitle: Text(
+              shareOptions.includeKey ? '包含密钥的可导入链接' : '不包含密钥',
+            ),
             onTap: () => Navigator.pop(sheetContext, _ShareAction.system),
           ),
           ListTile(
@@ -694,7 +696,9 @@ class _HomePageState extends State<HomePage> {
       'build': _appBuild.toString(),
       if (platform.isNotEmpty) 'platform': platform,
     };
-    final updateUri = Uri.parse('$_websiteBase/api/update').replace(queryParameters: query);
+    final updateUri = Uri.parse('$_websiteBase/api/update').replace(
+      queryParameters: query,
+    );
     final client = HttpClient();
     try {
       final request = await client.getUrl(updateUri);
@@ -714,9 +718,11 @@ class _HomePageState extends State<HomePage> {
         context: context,
         builder: (dialogContext) => AlertDialog(
           title: Text(available ? '发现新版本 $version' : '已是最新版本'),
-          content: Text(available
-              ? '检测到 $version，共有 ${assets.length} 个适配当前平台的安装包。打开网站查看下载。'
-              : '当前版本 $_appVersion（$_appBuild）已经是最新版本。'),
+          content: Text(
+            available
+                ? '检测到 $version，共有 ${assets.length} 个适配当前平台的安装包。打开网站查看下载。'
+                : '当前版本 $_appVersion（$_appBuild）已经是最新版本。',
+          ),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(dialogContext),
@@ -726,7 +732,10 @@ class _HomePageState extends State<HomePage> {
               FilledButton(
                 onPressed: () async {
                   Navigator.pop(dialogContext);
-                  await launchUrl(Uri.parse('$_websiteBase/#downloads'), mode: LaunchMode.externalApplication);
+                  await launchUrl(
+                    Uri.parse('$_websiteBase/#downloads'),
+                    mode: LaunchMode.externalApplication,
+                  );
                 },
                 child: const Text('打开下载页'),
               ),
@@ -825,7 +834,9 @@ class _HomePageState extends State<HomePage> {
       context: context,
       builder: (dialogContext) => AlertDialog(
         title: const Text('清除本机已保存密钥？'),
-        content: const Text('这会删除本应用保存的所有算法密钥，不影响当前输入框内容。此操作无法撤销。'),
+        content: const Text(
+          '这会删除本应用保存的所有算法密钥，不影响当前输入框内容。此操作无法撤销。',
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(dialogContext, false),
@@ -853,7 +864,9 @@ class _HomePageState extends State<HomePage> {
       context: context,
       builder: (dialogContext) => AlertDialog(
         title: const Text('撤回协议同意？'),
-        content: const Text('撤回后清空当前会话并退出应用，下次启动重新确认。已保存密钥请通过清除密钥入口单独删除。'),
+        content: const Text(
+          '撤回后清空当前会话并退出应用，下次启动重新确认。已保存密钥请通过清除密钥入口单独删除。',
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(dialogContext, false),
