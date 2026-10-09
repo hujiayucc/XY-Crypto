@@ -63,7 +63,9 @@ abstract final class ShareCodec {
     if (!_isSupportedUri(deepLink) || deepLink.scheme != scheme) {
       throw const FormatException('分享链接格式无效');
     }
-    final webUri = Uri.parse('$webShareBase#${Uri.encodeComponent(deepLink.toString())}');
+    final webUri = Uri.parse(
+      '$webShareBase#${Uri.encodeComponent(deepLink.toString())}',
+    );
     if (webUri.toString().length > 8192) {
       throw const FormatException('分享链接过长');
     }
