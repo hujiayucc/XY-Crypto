@@ -8,11 +8,11 @@
 
 - Android：`android-arm32-apk`、`android-arm64-apk`、`android-x86_64-apk`、`android-all-apk`
 - Windows amd64/arm64：绿色版 `*-portable.zip` 与 Inno Setup `*-setup.exe`
-- Linux amd64/arm64：绿色版 `*-portable.tar.gz` 与 Debian `*.deb`
+- Linux amd64/arm64：可直接运行的 `*-portable.tar.gz`、`*-portable.tar.xz`，以及 Debian `*.deb`、RPM `*.rpm`、Arch `*.pkg.tar.zst`
 - iOS：未签名 `XY-Crypto-ios-unsigned.tar.gz`
 - macOS：未签名 `XY-Crypto-macos-unsigned.zip`
 
-Windows 和 Linux 的架构使用矩阵分别构建，不把不同架构混入同一个包。Windows ARM64 使用 Visual Studio `x64_arm64` 交叉工具链；Windows 绿色版解压后直接运行 `xy_encrypt_app.exe`。Linux ARM64 使用 ARM64 GitHub runner；Linux portable 包解压后运行 `xy_encrypt_app`，`.deb` 负责系统级安装入口、desktop 文件和图标注册。
+Windows 和 Linux 的架构使用矩阵分别构建，不把不同架构混入同一个包。Windows amd64 使用 x64 runner，Windows ARM64 使用 `windows-11-arm` runner；两者均直接运行对应架构的 Flutter Release 构建。Windows 绿色版解压后直接运行 `xy_encrypt_app.exe`。Linux amd64/arm64 使用对应 GitHub runner；portable 包解压后运行 bundle 内的 `xy_encrypt_app`，Debian/RPM/Arch 包分别负责对应发行版的安装入口、desktop 文件和图标注册。
 
 ## Android 签名 Secrets
 
@@ -35,6 +35,6 @@ Windows 和 Linux 的架构使用矩阵分别构建，不把不同架构混入�
 
 ## Linux 签名
 
-当前 Linux job 产出 portable tarball 和 `.deb`。正式发布可在产物生成后使用 GPG detached signature 或 Sigstore/Cosign 签署，并把公钥或透明日志链接一并发布。
+当前 Linux job 为 amd64/arm64 分别产出可直接运行的 `.tar.gz`、`.tar.xz`，以及 Debian `.deb`、RPM `.rpm` 和 Arch `.pkg.tar.zst`。正式发布可在产物生成后使用 GPG detached signature 或 Sigstore/Cosign 签署，并把公钥或透明日志链接一并发布。
 
 `code-check.yml` 不上传 Release；`ci.yml` 手动触发后把矩阵产物发布到 `preview-ci-*` 且标记为 Preview；`release.yml` 在 `v*` 标签或手动指定标签时把所有矩阵产物汇总到正式 GitHub Release，不标记为 Preview。

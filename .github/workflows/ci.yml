@@ -5,6 +5,7 @@ on:
 
 env:
   FLUTTER_VERSION: '3.35.4'
+  DART_VERSION: '3.9.2'
   APP_VERSION: '1.3.1'
   BUILD_NUMBER: '180'
 
@@ -98,24 +99,40 @@ jobs:
   windows:
     name: Windows ${{ matrix.arch }}
     needs: analyze
-    runs-on: windows-latest
+    runs-on: ${{ matrix.runner }}
     strategy:
       fail-fast: false
       matrix:
         include:
           - arch: amd64
+            runner: windows-latest
             flutter_arch: x64
             vs_arch: x64
+            custom_flutter: false
           - arch: arm64
+            runner: windows-11-arm
             flutter_arch: arm64
-            vs_arch: x64_arm64
+            vs_arch: arm64
+            custom_flutter: true
     steps:
       - uses: actions/checkout@v4
-      - uses: subosito/flutter-action@v2
+      - name: Set up Flutter x64
+        if: ${{ !matrix.custom_flutter }}
+        uses: subosito/flutter-action@v2
         with:
           flutter-version: ${{ env.FLUTTER_VERSION }}
           channel: stable
           cache: true
+      - name: Set up Dart ARM64
+        if: ${{ matrix.custom_flutter }}
+        uses: dart-lang/setup-dart@v1
+        with:
+          sdk: ${{ env.DART_VERSION }}
+          architecture: arm64
+      - name: Set up Flutter ARM64
+        if: ${{ matrix.custom_flutter }}
+        shell: pwsh
+        run: pwsh -File tool/setup_flutter_windows_arm64.ps1 $env:FLUTTER_VERSION $env:DART_VERSION
       - uses: ilammy/msvc-dev-cmd@v1
         with:
           arch: ${{ matrix.vs_arch }}
@@ -126,7 +143,7 @@ jobs:
       - run: flutter pub get
       - name: Build portable bundle
         shell: pwsh
-        run: flutter build windows --release --no-pub --target-platform windows-${{ matrix.flutter_arch }}
+        run: flutter build windows --release --no-pub
       - name: Package portable ZIP
         shell: pwsh
         run: |
@@ -161,21 +178,35 @@ jobs:
             runner: ubuntu-24.04
             flutter_arch: x64
             deb_arch: amd64
+            custom_flutter: false
           - arch: arm64
             runner: ubuntu-24.04-arm
             flutter_arch: arm64
             deb_arch: arm64
+            custom_flutter: true
     steps:
       - uses: actions/checkout@v4
-      - uses: subosito/flutter-action@v2
+      - name: Set up Flutter x64
+        if: ${{ !matrix.custom_flutter }}
+        uses: subosito/flutter-action@v2
         with:
           flutter-version: ${{ env.FLUTTER_VERSION }}
           channel: stable
           cache: true
+      - name: Set up Dart ARM64
+        if: ${{ matrix.custom_flutter }}
+        uses: dart-lang/setup-dart@v1
+        with:
+          sdk: ${{ env.DART_VERSION }}
+          architecture: arm64
+      - name: Set up Flutter ARM64
+        if: ${{ matrix.custom_flutter }}
+        shell: bash
+        run: bash tool/setup_flutter_linux_arm64.sh "$FLUTTER_VERSION" "$DART_VERSION"
       - name: Install Linux build tools
         run: |
           sudo apt-get update
-          sudo apt-get install -y clang cmake ninja-build pkg-config libgtk-3-dev liblzma-dev libsecret-1-dev dpkg-dev qemu-user-static
+          sudo apt-get install -y clang cmake ninja-build pkg-config libgtk-3-dev liblzma-dev libsecret-1-dev dpkg-dev rpm zstd xz-utils qemu-user-static
       - run: flutter config --enable-linux-desktop
       - run: node tool/build_legal_site.cjs
       - run: flutter pub get
@@ -189,8 +220,11 @@ jobs:
           set -eux
           mkdir -p ci-dist
           bundle="build/linux/${{ matrix.flutter_arch }}/release/bundle"
-          tar -C "$(dirname "$bundle")" -czf "ci-dist/XY-Crypto-linux-${{ matrix.arch }}-portable.tar.gz" "$(basename "$bundle")"
-          bash packaging/linux/build-deb.sh "$bundle" ci-dist "${{ matrix.deb_arch }}"
+          if [ ! -d "$bundle" ]; then
+            echo "Linux bundle not found: $bundle" >&2
+            exit 1
+          fi
+          APP_VERSION="${{ env.APP_VERSION }}" bash packaging/linux/build-packages.sh "$bundle" ci-dist "${{ matrix.deb_arch }}"
       - uses: actions/upload-artifact@v4
         with:
           name: linux-${{ matrix.arch }}
@@ -212,7 +246,7 @@ jobs:
       - name: Build iOS no-codesign archive
         run: flutter build ios --release --no-codesign --no-pub
       - name: Build macOS archive
-        run: flutter build macos --release --no-codesign --no-pub
+        run: flutter build macos --release --no-pub
       - name: Package Apple archives
         shell: bash
         run: |
