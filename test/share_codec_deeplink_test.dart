@@ -17,6 +17,14 @@ void main() {
     expect(ShareCodec.findShareLink('xyd://other?type=0&text=4142'), isNull);
   });
 
+  test('supports an empty app launch link without share data', () {
+    final uri = ShareCodec.openAppUri;
+    expect(uri.toString(), 'xyd://open');
+    expect(ShareCodec.isOpenAppLink(uri.toString()), isTrue);
+    expect(ShareCodec.isShareLink(uri.toString()), isFalse);
+    expect(ShareCodec.isOpenAppLink('xyd://open?text=4142'), isFalse);
+  });
+
   test('wraps the xyd payload in a website fragment', () {
     final web = ShareCodec.encodeWebShare(CryptoMode.hex, '4142');
     expect(web.toString(), startsWith('https://app.hujiayucc.cn/share#'));

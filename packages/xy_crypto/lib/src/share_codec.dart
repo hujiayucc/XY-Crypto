@@ -19,6 +19,7 @@ class SharedText {
 abstract final class ShareCodec {
   static const scheme = 'xyd';
   static const host = 'share';
+  static const openHost = 'open';
   static const legacyHost = 'app.hujiayucc.cn';
   static const webShareBase = 'https://app.hujiayucc.cn/share';
 
@@ -92,6 +93,18 @@ abstract final class ShareCodec {
   static int encodedPayloadLength(Uri uri) {
     final payload = uri.queryParameters['text'];
     return payload == null ? 0 : Uri.encodeQueryComponent(payload).length;
+  }
+
+  static Uri get openAppUri => Uri(scheme: scheme, host: openHost);
+
+  static bool isOpenAppLink(String text) {
+    final uri = Uri.tryParse(text.trim());
+    return uri != null &&
+        uri.scheme == scheme &&
+        uri.host == openHost &&
+        uri.path.isEmpty &&
+        uri.query.isEmpty &&
+        uri.fragment.isEmpty;
   }
 
   static bool isShareLink(String text) {

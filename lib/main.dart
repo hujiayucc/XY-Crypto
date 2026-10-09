@@ -178,7 +178,7 @@ class _XyAppState extends State<XyApp> {
     if (!mounted || !_legalAccepted) return;
     final epoch = _consentEpoch;
     final trimmed = text.trim();
-    if (trimmed.isEmpty) return;
+    if (trimmed.isEmpty || ShareCodec.isOpenAppLink(trimmed)) return;
     try {
       final link = ShareCodec.findShareLink(trimmed);
       if (uriOnly && !ShareCodec.isShareLink(trimmed)) {

@@ -1,5 +1,6 @@
 const platformNames = { android: 'Android', windows: 'Windows', linux: 'Linux', ios: 'iOS', macos: 'macOS' };
-let appLink = '';
+const emptyAppLink = 'xyd://open';
+let appLink = emptyAppLink;
 
 function escapeHtml(value) {
   return String(value ?? '').replace(/[&<>"']/g, (char) => {
@@ -45,7 +46,7 @@ function setState(data) {
     status.style.color = '#963e32';
     title.textContent = '没有找到可打开的分享';
     detail.textContent = '请确认你使用的是完整的 XY加密分享链接。';
-    document.querySelector('#open-app').setAttribute('disabled', 'disabled');
+    document.querySelector('#open-app').removeAttribute('disabled');
     return;
   }
   status.textContent = '已准备就绪';
@@ -64,12 +65,11 @@ function renderDownloads(release) {
     target.innerHTML = '<div class="empty-card">暂时没有可用安装包，请回到首页查看版本状态。</div>';
     return;
   }
-  target.innerHTML = [...groups.entries()].map(([platform, assets]) => `<article class="download-card"><div><h3>${escapeHtml(platformNames[platform] ?? platform)}</h3><small>${escapeHtml(release.version)}</small></div><div class="asset-list">${assets.map((asset) => `<a class="asset-link" href="${escapeHtml(asset.url)}" rel="noreferrer">${escapeHtml(asset.arch)}</a>`).join('')}</div></article>`).join('');
+  target.innerHTML = [...groups.entries()].map(([platform, assets]) => `<article class="download-card"><div><h3>${escapeHtml(platformNames[platform] ?? platform)}</h3><small>${escapeHtml(release.version)}</small></div><div class="asset-list">${assets.map((asset) => `<a class="asset-link" href="${escapeHtml(asset.url)}" rel="noreferrer" title="${escapeHtml(asset.name)}">${escapeHtml(asset.name)}</a>`).join('')}</div></article>`).join('');
 }
 
 function tryOpenApp() {
-  if (!appLink) return;
-  window.location.href = appLink;
+  window.location.href = appLink || emptyAppLink;
   window.setTimeout(() => {
     const hint = document.querySelector('#share-hint');
     if (hint) hint.textContent = '应用没有响应？请从下方选择你的平台下载安装。';
@@ -88,7 +88,7 @@ async function loadRelease() {
 
 const shareUri = decodeFragment();
 const shareData = parseShare(shareUri);
-appLink = shareData ? shareUri : '';
+appLink = shareData ? shareUri : emptyAppLink;
 setState(shareData);
 document.querySelector('#open-app')?.addEventListener('click', tryOpenApp);
 loadRelease();
