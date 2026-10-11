@@ -1,0 +1,95 @@
+name: XY Crypto iOS IPA
+
+on:
+  workflow_dispatch:
+    inputs:
+      export_method:
+        description: Apple export method; use development for a free Personal Team
+        required: true
+        default: development
+        type: choice
+        options:
+          - development
+          - ad-hoc
+          - app-store
+
+permissions:
+  contents: read
+
+env:
+  FLUTTER_VERSION: '3.35.4'
+
+jobs:
+  build:
+    name: Build signed iOS IPA
+    runs-on: macos-14
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+          cache: true
+      - run: node tool/build_legal_site.cjs
+      - run: flutter pub get
+      - name: Configure Apple signing
+        shell: bash
+        env:
+          IOS_CERTIFICATE_BASE64: ${{ secrets.IOS_CERTIFICATE_BASE64 }}
+          IOS_CERTIFICATE_PASSWORD: ${{ secrets.IOS_CERTIFICATE_PASSWORD }}
+          IOS_PROVISIONING_PROFILE_BASE64: ${{ secrets.IOS_PROVISIONING_PROFILE_BASE64 }}
+          IOS_BUNDLE_ID: ${{ vars.IOS_BUNDLE_ID }}
+          IOS_TEAM_ID: ${{ vars.IOS_TEAM_ID }}
+          IOS_EXPORT_METHOD: ${{ inputs.export_method }}
+          IOS_CODE_SIGN_IDENTITY: ${{ vars.IOS_CODE_SIGN_IDENTITY }}
+        run: bash tool/configure_ios_signing.sh
+      - name: Build IPA
+        run: flutter build ipa --release --no-pub --export-options-plist=ios/ExportOptions.plist
+      - name: Verify and name IPA
+        id: package
+        shell: bash
+        run: |
+          set -euo pipefail
+          ipa_path="$(find build/ios/ipa -maxdepth 1 -name '*.ipa' -print -quit)"
+          if [ -z "$ipa_path" ]; then
+            echo 'No IPA was produced.' >&2
+            exit 1
+          fi
+          inspect_dir="$(mktemp -d)"
+          trap 'rm -rf "$inspect_dir"' EXIT
+          unzip -q "$ipa_path" -d "$inspect_dir"
+          app_path="$(find "$inspect_dir/Payload" -maxdepth 1 -name '*.app' -print -quit)"
+          if [ -z "$app_path" ]; then
+            echo 'IPA does not contain an application bundle.' >&2
+            exit 1
+          fi
+          executable="$(/usr/libexec/PlistBuddy -c 'Print :CFBundleExecutable' "$app_path/Info.plist")"
+          arch="$(lipo -archs "$app_path/$executable")"
+          case "$arch" in
+            arm64) label=arm64 ;;
+            *)
+              echo "Unexpected iOS architecture: $arch" >&2
+              exit 1
+              ;;
+          esac
+          codesign --verify --deep --strict --verbose=2 "$app_path"
+          ipa_name="XY加密-iOS-${label}.ipa"
+          cp "$ipa_path" "$ipa_name"
+          echo "ipa_name=$ipa_name" >> "$GITHUB_OUTPUT"
+          echo "Verified signed IPA: $ipa_name"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ${{ steps.package.outputs.ipa_name }}
+          path: ${{ steps.package.outputs.ipa_name }}
+          if-no-files-found: error
+      - name: Clean temporary iOS signing material
+        if: always()
+        shell: bash
+        run: |
+          if [ -n "${IOS_SIGNING_KEYCHAIN:-}" ] && [ -e "$IOS_SIGNING_KEYCHAIN" ]; then
+            security delete-keychain "$IOS_SIGNING_KEYCHAIN" || true
+          fi
+          if [ -n "${IOS_SIGNING_PROFILE_PATH:-}" ]; then
+            rm -f "$IOS_SIGNING_PROFILE_PATH"
+          fi
+          rm -f ios/Flutter/Signing.xcconfig ios/ExportOptions.plist

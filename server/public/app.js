@@ -28,7 +28,7 @@ function renderDownloads(release, target) {
     element.innerHTML = '<div class="empty-card">当前通道暂无可用安装包，请稍后再试。</div>';
     return;
   }
-  element.innerHTML = [...groups.entries()].map(([platform, assets]) => `<article class="download-card"><div><h3>${escapeHtml(platformNames[platform] ?? platform)}</h3><small>${escapeHtml(release.version)} · ${release.channel === 'preview' ? 'Preview' : '稳定版'}</small></div><div class="asset-list">${assets.map((asset) => `<a class="asset-link" href="${escapeHtml(asset.url)}" rel="noreferrer">${escapeHtml(asset.arch)}</a>`).join('')}</div></article>`).join('');
+  element.innerHTML = [...groups.entries()].map(([platform, assets]) => `<article class="download-card"><div><h3>${escapeHtml(platformNames[platform] ?? platform)}</h3><small>${escapeHtml(release.version)} · ${release.channel === 'preview' ? 'Preview' : '稳定版'}</small></div><div class="asset-list">${assets.map((asset) => `<a class="asset-link" href="${escapeHtml(asset.url)}" rel="noreferrer" title="${escapeHtml(asset.name)}">${escapeHtml(asset.name)}</a>`).join('')}</div></article>`).join('');
 }
 
 async function fetchLatest(channel) {

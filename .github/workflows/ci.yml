@@ -267,7 +267,7 @@ jobs:
           path: ci-dist/*
 
   apple:
-    name: Apple unsigned CI archives
+    name: Apple CI archives
     needs: analyze
     runs-on: macos-14
     steps:
@@ -279,24 +279,75 @@ jobs:
           cache: true
       - run: node tool/build_legal_site.cjs
       - run: flutter pub get
-      - name: Build iOS no-codesign archive
-        run: flutter build ios --release --no-codesign --no-pub
+      - name: Configure iOS signing when materials are available
+        id: ios_signing
+        shell: bash
+        env:
+          IOS_CERTIFICATE_BASE64: ${{ secrets.IOS_CERTIFICATE_BASE64 }}
+          IOS_CERTIFICATE_PASSWORD: ${{ secrets.IOS_CERTIFICATE_PASSWORD }}
+          IOS_PROVISIONING_PROFILE_BASE64: ${{ secrets.IOS_PROVISIONING_PROFILE_BASE64 }}
+          IOS_BUNDLE_ID: ${{ vars.IOS_BUNDLE_ID }}
+          IOS_TEAM_ID: ${{ vars.IOS_TEAM_ID }}
+          IOS_EXPORT_METHOD: ${{ vars.IOS_EXPORT_METHOD }}
+          IOS_CODE_SIGN_IDENTITY: ${{ vars.IOS_CODE_SIGN_IDENTITY }}
+        run: |
+          if [ -z "$IOS_CERTIFICATE_BASE64" ] && [ -z "$IOS_PROVISIONING_PROFILE_BASE64" ]; then
+            echo 'iOS signing materials are absent; producing the unsigned archive.'
+            echo 'enabled=false' >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          if [ -z "$IOS_CERTIFICATE_BASE64" ] || [ -z "$IOS_CERTIFICATE_PASSWORD" ] || [ -z "$IOS_PROVISIONING_PROFILE_BASE64" ]; then
+            echo 'iOS signing materials are incomplete.' >&2
+            exit 1
+          fi
+          bash tool/configure_ios_signing.sh
+          echo 'enabled=true' >> "$GITHUB_OUTPUT"
+      - name: Build iOS package
+        id: ios_build
+        shell: bash
+        env:
+          IOS_SIGNING_ENABLED: ${{ steps.ios_signing.outputs.enabled }}
+        run: |
+          if [ "$IOS_SIGNING_ENABLED" = true ]; then
+            flutter build ipa --release --no-pub --export-options-plist=ios/ExportOptions.plist
+            ipa_path="$(find build/ios/ipa -maxdepth 1 -name '*.ipa' -print -quit)"
+            if [ -z "$ipa_path" ]; then
+              echo 'flutter build ipa did not produce an IPA.' >&2
+              exit 1
+            fi
+            echo "ios_ipa_path=$ipa_path" >> "$GITHUB_OUTPUT"
+          else
+            flutter build ios --release --no-codesign --no-pub
+          fi
       - name: Build macOS archive
         run: flutter build macos --release --no-pub
       - name: Package Apple archives with detected architecture
         id: apple_packages
         shell: bash
+        env:
+          IOS_IPA_PATH: ${{ steps.ios_build.outputs.ios_ipa_path }}
         run: bash packaging/apple/build-archives.sh ci-dist
       - uses: actions/upload-artifact@v4
         with:
           name: ${{ steps.apple_packages.outputs.ios_name }}
-          path: ci-dist/${{ steps.apple_packages.outputs.ios_name }}.tar.gz
+          path: ci-dist/${{ steps.apple_packages.outputs.ios_file }}
           if-no-files-found: error
       - uses: actions/upload-artifact@v4
         with:
           name: ${{ steps.apple_packages.outputs.macos_name }}
           path: ci-dist/${{ steps.apple_packages.outputs.macos_name }}.zip
           if-no-files-found: error
+      - name: Clean temporary iOS signing material
+        if: always()
+        shell: bash
+        run: |
+          if [ -n "${IOS_SIGNING_KEYCHAIN:-}" ] && [ -e "$IOS_SIGNING_KEYCHAIN" ]; then
+            security delete-keychain "$IOS_SIGNING_KEYCHAIN" || true
+          fi
+          if [ -n "${IOS_SIGNING_PROFILE_PATH:-}" ]; then
+            rm -f "$IOS_SIGNING_PROFILE_PATH"
+          fi
+          rm -f ios/Flutter/Signing.xcconfig ios/ExportOptions.plist
 
   preview_release:
     name: Publish CI preview release

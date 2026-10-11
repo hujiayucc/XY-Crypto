@@ -10,6 +10,9 @@ build/
 android/local.properties
 android/key.properties
 ios/Flutter/Generated.xcconfig
+ios/Flutter/Signing.xcconfig
+ios/ExportOptions.plist
+
 macos/Flutter/ephemeral/
 
 # Local signing material

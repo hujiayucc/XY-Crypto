@@ -7,6 +7,7 @@
   <link rel="icon" type="image/png" href="/app-icon.png">
   <title>XY加密 · 简洁、私密、跨平台</title>
   <link rel="stylesheet" href="/styles.css">
+  <script src="/app.js" defer></script>
   <!-- The client calls /api/update directly; the site has no update UI. -->
 </head>
 <body>
@@ -58,7 +59,17 @@
       </div>
     </section>
 
-<!-- Downloads remain available from the share fallback page. -->
+<section id="downloads" class="download-section section-shell">
+      <div class="split-heading">
+        <div class="section-heading"><p class="eyebrow">尚未安装？</p><h2>先获取应用。</h2></div>
+        <div class="channel-switch" role="group" aria-label="版本通道">
+          <button class="channel-button active" type="button" data-channel="stable">稳定版</button>
+          <button class="channel-button" type="button" data-channel="preview">Preview</button>
+        </div>
+      </div>
+      <p class="inline-status" id="release-status" aria-live="polite">正在读取稳定版本…</p>
+      <div id="download-grid" class="download-grid"></div>
+    </section>
 
     <!-- Update detection is exposed through /api/update for clients. -->
   </main>
