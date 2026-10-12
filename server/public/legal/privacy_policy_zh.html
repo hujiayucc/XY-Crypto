@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="referrer" content="no-referrer"><meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; base-uri 'none'; form-action 'none'"><title>XY加密隐私政策</title><style>:root{color-scheme:light dark}body{font-family:system-ui,sans-serif;line-height:1.8;margin:0;padding:24px;color:#242124;background:#fff}main{max-width:960px;margin:auto}h1{font-size:28px}h2{font-size:21px;margin-top:32px}p{overflow-wrap:anywhere}table{width:100%;border-collapse:collapse;font-size:15px}td,th{border:1px solid #bbb;padding:12px;vertical-align:top;overflow-wrap:anywhere}th{background:#f6edf1}a{color:#993653}nav{margin-bottom:24px}code{font-family:inherit}@media(max-width:600px){body{padding:16px}table,tbody,tr,td,th{display:block}thead{display:none}tr{margin-bottom:16px}td{border-bottom:0}td:last-child{border-bottom:1px solid #bbb}td:first-child{font-weight:600}}@media(prefers-color-scheme:dark){body{background:#161416;color:#eee}th{background:#31252b}a{color:#ffb3ca}}</style></head><body><main><h1>XY加密隐私政策</h1>
+<p>版本：2.0</p>
+<p>更新日期：2026/10/07</p>
+<p>生效日期：2022/10/25</p>
+<p>个人信息处理者：胡佳宇</p>
+<p>联系邮箱：hujiayucc@qq.com</p>
+<p>本文件为开发预览版；ML Kit 境外处理资料待补齐和核验后正式发布。本政策及下列清单说明本应用对个人信息的处理方式，不作平台审核通过承诺。</p>
+<h2>1. 适用范围与核心功能</h2>
+<p>XY加密（Android 包名 com.hujiayucc.decode）提供本机文本编码、摘要、派生、加解密和签名。应用没有账号、广告、个性化推荐、定向推送或云同步服务。运营者未建设接收文本和密钥的业务服务器；这不表示所有第三方 SDK 都不传输信息。</p>
+<p>相机扫码使用的 Google ML Kit 有官方披露的诊断和使用情况分析数据，包括每次安装标识符。具体种类、目的、传输方式、第三方身份与控制见本政策附录，用户也可选择无需该 SDK 的本地图片识别。</p>
+<h2>2. 告知、同意与按需处理</h2>
+<p>首次启动在启动页上展示协议弹窗，同意框默认未勾选。阅读文档不等于同意；仅主动勾选并点击“同意并继续”后保存政策版本、UTC 时间并启用业务。选择“退出应用”结束 Android 应用。Android 在确认前不注册可选 Flutter 业务插件，不解析外部分享文本/链接，移除了 ML Kit 的自动初始化 Provider。</p>
+<p>非必要权限在具体场景单独申请，政策同意不代替系统权限或扫码 SDK 提示。拒绝相机、取消选择文件或取消分享均不影响本地加解密。政策处理范围变更时提高版本号并重新提示。</p>
+<h2>3. 本地处理与密钥安全存储</h2>
+<p>输入、结果和本次密钥通常在会话内存中处理。密钥输入默认不记住；用户主动勾选后写入本机平台安全存储。再次取消勾选只影响本次保存，已有密钥需通过“清除本机已保存密钥”删除。密钥槽位按算法家族共用，加密可读取此前保存的对应密钥，解密操作仍由用户确认输入。</p>
+<p>安全存储的保护能力依赖平台和锁屏配置，不保证丢失密钥恢复或物理内存安全擦除。Android 关闭系统自动备份开关；设备迁移、第三方备份及 Apple Keychain 的保留行为仍受系统机制影响。</p>
+<h2>4. 敏感内容与对外提供</h2>
+<p>请仅输入功能所需的信息。文本、文件或图片可能含有身份、财产、健康等敏感个人信息；用户应审慎选择，应用不主动要求这些信息。相机图像为扫码所需，在设备识别。密钥、明文及含密钥的分享链接属于需要重点保护的秘密。</p>
+<p>系统分享、复制和二维码由用户逐次发起；默认不携带密钥。勾选包含密钥后，密钥以链接参数形式与密文一同交给所选渠道，取得链接的人可能直接解密。已被第三方取得的副本需通过对应接收方处理，撤回本应用同意不自动撤回已发送内容。</p>
+<h2>5. 保存期限、存储与境外处理</h2>
+<p>会话内容保留至清空、撤回或进程结束；记住的密钥保留至主动清除或平台清理；文件选择器可能生成临时缓存。各类期限和删除路径详见个人信息清单。</p>
+<p>ML Kit 诊断由 Google 按其隐私规则处理。其公开披露没有给出本应用可配置的固定保存天数，接收地点、境外处理与适用程序需运营主体核实后再发行；本预览版不将“SDK 使用 HTTPS”解释为已完成相关手续。用户可不启用相机扫码，继续使用本地算法和图片识别。用户访问的境外网站或第三方分享目标还按对应服务规则处理。</p>
+<h2>6. 用户权利与操作路径</h2>
+<p>查阅和复制：菜单 → 隐私政策，或菜单 → 隐私中心 → 各清单；正文支持文本选择复制。输入/输出可自行查阅、修改、复制和清空。账户注销：本版本无账号系统，无账号注销对象。</p>
+<p>删除：菜单 → 清除本机已保存密钥；输入和输出分别清空；文件源副本由你删除；缓存可在 Android 系统应用设置中清除。清除本机密钥只删除五类密钥槽位，不删除政策同意记录，也不删除对外分享副本。</p>
+<p>撤回：菜单 → 撤回协议同意 → 确认。删除确认记录、清空会话并退出 Android 应用，终止当前进程的可选 SDK 工作；下次启动重新确认。撤回不影响撤回前基于有效同意的处理；已保存密钥可先单独清除。</p>
+<p>权限：菜单 → 隐私中心 → 系统权限管理。相机权限可在系统撤销。无个性化推荐/广告/定向推送功能，因此没有虚设开关。查阅、更正、复制、删除、限制处理及投诉可通过下方隐私邮箱提出；正式运营后在收到请求起 15 个工作日内核验并答复，法律另有要求从其规定。身份核验限于处理请求必要信息，不索取加密密钥或无关身份资料。</p>
+<h2>7. 未成年人和安全</h2>
+<p>未成年人请在监护人指导下使用；不满十四周岁的用户应由监护人阅读并作出必要决定。本应用非面向儿童的服务，不要求提交年龄或身份证。监护人可通过下方渠道咨询本机数据删除及权利请求。</p>
+<p>采用本地计算、按需权限、平台存储、SDK 延迟初始化等措施，并持续检查依赖。任何软件和设备都存在风险；发生信息安全事件时将按适用规定处置和告知，避免在日志中输出明文、密钥或分享链接。</p>
+<h2>8. 联系与版本更新</h2>
+<p>个人信息处理者：胡佳宇</p>
+<p>隐私邮箱：hujiayucc@qq.com</p>
+<p>正式发布前应确认上述主体和邮箱与开发者平台登记主体一致，并将同一版本全文部署到免登录的 HTTPS 静态页面。政策实质变更时更新日期、版本并在应用提示。以下四份附录是本政策组成部分，应用内与 HTML 正文使用同一来源生成。</p>
+<h2>附录1：个人信息收集清单</h2>
+<p>本清单说明功能涉及的信息类型，不是用户操作日志；未触发相应功能时不产生该项业务处理。文本、图片可能包含个人信息，本地处理也属于信息处理，不等于零收集。</p>
+<table>
+<tr><th>功能与信息类型</th><th>目的、方式和触发条件</th><th>保存位置、期限及删除方式</th></tr>
+<tr><td>文本编码、加解密、摘要、派生、签名：输入文本、密钥、参数及输出</td><td>用户输入或导入后在本机计算；不向运营者服务器上传</td><td>当前会话内存；清空输入/输出、撤回同意或进程结束时释放；内存释放不等于物理安全擦除</td></tr>
+<tr><td>记住密钥：密码和密钥 JSON</td><td>仅主动勾选记住后保存在本机；新输入默认不勾选</td><td>平台安全存储，保留到用户清除或平台清理；菜单“清除本机已保存密钥”删除五类密钥槽位；取消勾选只是不保存本次新值，不删除旧值</td></tr>
+<tr><td>导入文件及图片：所选文件内容、文件名、路径/临时 URI</td><td>点击文件选择器后仅读取所选项目；图片以 image 和 zxing2 本地解码</td><td>内存及选择器可能创建的应用私有缓存；缓存随平台清理，Android 可通过系统清除缓存移除；源文件由用户自行删除</td></tr>
+<tr><td>相机画面和二维码结果</td><td>用户确认扫码说明且相机获准后处理；图像在设备识别，不录制视频</td><td>扫描期间内存；退出扫描页结束画面处理；结果导入当前会话</td></tr>
+<tr><td>剪贴板文本</td><td>用户主动点击导入或使用系统粘贴功能时读取；复制功能写入用户选定的内容</td><td>导入内容进入会话；系统剪贴板副本由系统/用户管理，不自动定时读取</td></tr>
+<tr><td>外部分享：链接、文本、可选密钥</td><td>操作系统按用户选择将内容交给应用；同意政策后才由应用业务层解析</td><td>待处理 Intent 由操作系统投递；应用解析后清空 Intent，结果进入会话；拒绝/撤回不解析并清空</td></tr>
+<tr><td>同意记录：政策版本和 UTC 确认时间</td><td>决定是否展示新版本确认框，无设备标识；Android 使用应用私有配置</td><td>本机；撤回删除；旧版本不视为新版本同意</td></tr>
+<tr><td>相机权限拒绝时间</td><td>Android 记录最近一次拒绝时刻，避免 48 小时内重复弹系统请求；启动时不申请</td><td>应用私有配置，下一次拒绝覆盖；清除应用数据移除，不用于画像</td></tr>
+<tr><td>ML Kit 诊断信息：制造商、型号、系统版本/build、硬件加速器信息、包名/版本、每次安装标识符、延迟、API 配置、输入输出大小、功能版本、事件及错误码</td><td>Android 相机扫码使用捆绑模型；Google 官方披露这些信息用于诊断和使用情况分析，经 HTTPS 传输。不是输入文本或图像内容上传</td><td>Google 按其条款处理；官方数据披露页未承诺本应用可设置的固定保存天数。准确接收地点、期限及权利响应须发布方核验，详见共享清单</td></tr>
+<tr><td>网页访问信息（仅主动进入网页功能时）</td><td>目标站点接收请求 URL、IP、浏览器/系统信息及你提交的内容，可能设置 Cookie</td><td>系统 WebView 或外部浏览器、目标站点；应用内网页菜单可清缓存/本地存储，Cookie/外部浏览器副本按系统与站点设置处理</td></tr>
+</table>
+<p>本应用无账号、广告、定向推送、位置、通讯录、短信、电话和麦克风业务。应用自身代码没有读取 IMEI、IMSI、OAID、Android ID、MAC、BSSID、SSID 或设备软件安装列表的业务调用；该表述不排除上列 SDK 的每次安装标识符和诊断信息。</p>
+<h2>附录2：第三方共享个人信息清单</h2>
+<p>开源组件参与本机运算不等于向其开发者发送数据。以下分别说明独立 SDK 接收方、用户选择的分享目标与系统能力；完整组件名单见“第三方 SDK 与组件清单”。</p>
+<table>
+<tr><th>接收方/联系方式</th><th>信息类型和共享方式</th><th>目的、触发条件和控制</th></tr>
+<tr><td>Google LLC，ML Kit；隐私联系入口 https://policies.google.com/privacy</td><td>设备型号、厂商、系统/build、硬件加速器、包名/版本、每次安装标识符、性能/配置/事件/错误信息；SDK 经 HTTPS 发送；图像识别在本地</td><td>诊断和使用情况分析。Android 用户选择“同意并使用相机”且权限获准后才初始化；选择图片识别不启用 ML Kit。撤回政策同意后退出进程以停止 SDK 后续工作</td></tr>
+<tr><td>用户在系统分享面板中选择的接收应用及其服务提供者；以选择界面的身份与其隐私政策为准</td><td>选定文本、密文、链接或二维码所表达的内容；主动包含密钥时同传密钥</td><td>用户逐次发起分享、复制或展示二维码。默认不携带密钥；含密钥链接的持有者可读取密钥并解密。第三方已取得的副本需向相应接收方删除</td></tr>
+<tr><td>用户访问的网站、外部浏览器及其运营者；以目标域名/站点隐私政策为准</td><td>IP、请求地址、浏览器信息、Cookie、用户提交内容；网络访问产生</td><td>仅主动使用网页或外部链接时；关闭页面停止后续访问，已提交内容按站点规则处理</td></tr>
+<tr><td>操作系统、文件选择器、安全存储与系统分享能力的提供者</td><td>所选文件/URI、用户交给系统的剪贴板/分享内容、密钥安全存储等</td><td>提供用户发起的本机功能；不是向插件作者自动上传，系统备份/诊断等按系统设置管理</td></tr>
+</table>
+<h2>Google ML Kit 官方规则</h2>
+<p>Android 数据披露：https://developers.google.cn/ml-kit/android-data-disclosure?hl=zh-cn</p>
+<p>条款与隐私：https://developers.google.cn/ml-kit/terms</p>
+<p>Google 隐私政策及联系：https://policies.google.com/privacy</p>
+<p>官方披露页描述 SDK 最新版本，不替代对本项目锁定版本及发行包的动态核验。Google 的 SDK 数据保存期限、接收地点及可能的境外处理，需要运营主体在正式发布前查证并完成适用手续；当前开发预览版的说明不构成“已完成跨境合规”的结论。用户可选择不启用相机扫码而使用本地图片识别。</p>
+<h2>附录3：第三方 SDK 与组件清单</h2>
+<p>版本以本工程 pubspec.lock 及 Android 依赖解析为依据。开源项目维护者与法律意义上的数据接收者分别说明；未另设独立隐私政策的本地库不虚构隐私链接。依赖升级或替换后同步更新本清单。</p>
+<table>
+<tr><th>组件与实际版本</th><th>开发者/维护者、来源与政策</th><th>功能、处理信息、触发条件</th></tr>
+<tr><td>mobile_scanner 6.0.11</td><td>Julian Steenbakker / 开源贡献者；https://pub.dev/packages/mobile_scanner</td><td>相机扫码桥接。Android 为 ML Kit + CameraX；iOS/macOS 为 AVFoundation/Vision。处理相机画面及二维码结果，仅选择相机后运行</td></tr>
+<tr><td>Google ML Kit barcode-scanning 17.3.0、common 18.11.0（捆绑模型）</td><td>Google LLC；https://developers.google.cn/ml-kit/android-data-disclosure?hl=zh-cn；https://policies.google.com/privacy</td><td>图像本地识别；SDK 诊断信息见共享清单。Android 移除 MlKitInitProvider 自动初始化，用户确认扫码说明和相机授权后初始化</td></tr>
+<tr><td>AndroidX CameraX camera-lifecycle / camera-camera2 1.5.0</td><td>Google / Android Open Source Project；https://developer.android.com/jetpack/androidx/releases/camera</td><td>相机设备、预览、图像帧和生命周期；用户启用相机时调用，非账户或广告 SDK</td></tr>
+<tr><td>flutter_secure_storage 9.2.4</td><td>German Saprykin / 项目维护者；https://pub.dev/packages/flutter_secure_storage</td><td>平台安全存储。处理用户选择保存的密码/JSON 密钥；Apple/桌面还存同意记录。未配置向作者发送内容</td></tr>
+<tr><td>file_picker 8.3.7</td><td>Miguel Ruivo / 项目维护者；https://pub.dev/packages/file_picker</td><td>用户选择文件和二维码图片后，读取内容、名称、路径/URI，可产生私有临时缓存；未配置向作者上传</td></tr>
+<tr><td>share_plus 10.1.4</td><td>Flutter Community / Plus Plugins 维护者；https://pub.dev/packages/share_plus</td><td>主动分享文本及链接，交给系统和用户选择的应用；不由插件作者接收这些内容</td></tr>
+<tr><td>url_launcher 6.3.2；Android 6.3.29</td><td>Flutter 项目作者；https://pub.dev/packages/url_launcher</td><td>打开用户指定的外部地址；目标应用/网站按各自规则处理请求</td></tr>
+<tr><td>webview_flutter 4.13.1；Android 4.12.0</td><td>Flutter 项目作者；https://pub.dev/packages/webview_flutter</td><td>系统 WebView 展示主动访问的页面，可能有 URL、IP、Cookie 和页面存储；首页无自动访问网站行为</td></tr>
+<tr><td>app_links 6.4.1</td><td>llfbandit / 项目维护者；https://pub.dev/packages/app_links</td><td>处理操作系统投递的链接；本版 Android 使用自有同意控制通道且不注册该插件，其余平台保留深链能力，原生初始化行为需各宿主验收</td></tr>
+<tr><td>image 4.10.1</td><td>Brendan Duncan / 贡献者；https://pub.dev/packages/image</td><td>本地解码、缩放用户选择的图片；无需网络/相机</td></tr>
+<tr><td>zxing2 0.2.4</td><td>zxing-dart / xvrh 贡献者；https://pub.dev/packages/zxing2</td><td>本地图片二维码解码和二维码生成；处理像素或文本，不向作者上传</td></tr>
+<tr><td>crypto 3.0.6、pointycastle 3.9.1</td><td>Dart 项目作者；Pointy Castle / Bouncy Castle 贡献者；https://pub.dev/packages/crypto；https://pub.dev/packages/pointycastle</td><td>本机摘要、HMAC、派生、加密、签名运算；处理输入、参数与密钥，不带业务上传接口</td></tr>
+<tr><td>path_provider 2.1.5 / Android 2.2.23、flutter_plugin_android_lifecycle 2.0.34</td><td>Flutter 项目作者；https://pub.dev/packages/path_provider；https://pub.dev/packages/flutter_plugin_android_lifecycle</td><td>文件缓存目录与界面生命周期支持，本机路径/生命周期状态</td></tr>
+<tr><td>AndroidX Startup / Lifecycle / Core / ProfileInstaller、Google DataTransport 等间接原生依赖</td><td>Google / Android 开源项目；https://developer.android.com/jetpack/androidx；https://developers.google.cn/ml-kit/android-data-disclosure?hl=zh-cn</td><td>平台基础能力或 ML Kit 的间接运行组件；Google DataTransport 可承担诊断传输。实际解析依赖清单保存在构建证据中；不将其与本地算法库混称“零收集”</td></tr>
+</table>
+<p>Android 未同意前仅运行应用界面、离线政策和本地同意记录读取；业务插件在确认后注册。相机 SDK 另按使用场景延迟初始化。Flutter/操作系统基础运行并非个人信息收集免责依据，发行前仍需冷启动、拒绝、后台、权限撤回和网络抓包验证。</p>
+<h2>附录4：权限用途说明</h2>
+<p>本地文本转换、摘要和加解密不要求相机权限。权限按功能触发；系统授权与隐私政策确认是两件不同的操作。</p>
+<table>
+<tr><th>权限或能力</th><th>用途、申请时机</th><th>拒绝/撤回后的影响</th></tr>
+<tr><td>Android CAMERA；Apple 相机用途说明</td><td>用户选择相机识别并阅读提示后申请，仅用于二维码识别，不录音、不录制视频</td><td>相机扫码暂停；可选择图片识别、输入文本及继续本地加解密。Android 拒绝后 48 小时内不重复弹系统申请，可主动到系统设置修改</td></tr>
+<tr><td>Android INTERNET（普通权限）</td><td>用户主动访问网页，以及启用 ML Kit 后的 SDK 诊断通信；非启动广告或账户登录</td><td>系统若限制网络，本地算法与图片二维码处理仍可使用；网页或 SDK 网络请求受影响</td></tr>
+<tr><td>Android ACCESS_NETWORK_STATE（间接依赖普通权限）</td><td>依赖组件判断网络连接状态，非定位或读取 Wi-Fi 名称的用途</td><td>不作为本地算法的使用条件</td></tr>
+<tr><td>应用自定义 DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION</td><td>AndroidX 动态接收器的签名级保护</td><td>不向用户申请、非联系人/短信/定位权限</td></tr>
+<tr><td>系统文件/照片选择器</td><td>只读取用户选择的文件或图片；Apple 在需要时展示照片用途</td><td>取消选择后返回原页面，不批量遍历媒体文件；不申请所有文件访问</td></tr>
+<tr><td>剪贴板</td><td>点击剪贴板导入或系统粘贴时读取；点击复制时写入</td><td>未主动操作不轮询；系统关闭读取时仍可手动输入</td></tr>
+</table>
+<h2>管理路径</h2>
+<p>首页菜单 → 隐私中心 → 系统权限管理（3 次操作到系统设置入口），再按系统界面选择相机等权限。iOS/macOS 在系统“隐私与安全”中管理；不同设备的设置名称可能不同。</p>
+<p>应用没有短信、电话、通讯录、位置、录音、后台定位或广告标识权限用途。正式签名包的最终合并清单仍应逐项核查，不将开发包的检查替代发行包验收。</p></main></body></html>

@@ -3,6 +3,7 @@
 const fs=require('fs'),path=require('path'),crypto=require('crypto'),assert=require('assert/strict');
 const root=path.resolve(__dirname,'..'),input=path.join(root,'assets/legal'),out=path.join(root,'build_artifacts/legal_site');
 const siteDocuments=['privacy_policy_zh.md','user_agreement_zh.md'];
+const serverLegal=path.join(root,'server/public/legal');
 const check=process.argv.includes('--check'),release=process.argv.includes('--release');
 const escape=s=>s.replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','"').replaceAll("'",'&#39;');
 const decode=s=>s.replace(/&#39;/g,"'").replace(/"/g,'"').replace(/&gt;/g,'>').replace(/&lt;/g,'<').replace(/&amp;/g,'&');
@@ -22,7 +23,14 @@ for(const file of siteDocuments){
   const md=fs.readFileSync(path.join(input,file),'utf8'),r=render(md),title=md.split('\n')[0].replace(/^# /,'');
  const html='<!doctype html>\n<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="referrer" content="no-referrer"><meta http-equiv="Content-Security-Policy" content="default-src \'none\'; style-src \'unsafe-inline\'; base-uri \'none\'; form-action \'none\'"><title>'+escape(title)+'</title><style>'+css+'</style></head><body><main>'+r.body+'</main></body></html>\n';
  const name=file.replace('.md','.html');
- if(check)assert.equal(fs.readFileSync(path.join(out,name),'utf8'),html,'HTML stale: '+name);else fs.writeFileSync(path.join(out,name),html);
+ if(check){
+   assert.equal(fs.readFileSync(path.join(out,name),'utf8'),html,'HTML stale: '+name);
+   assert.equal(fs.readFileSync(path.join(serverLegal,name),'utf8'),html,'Server HTML stale: '+name);
+ }else{
+   fs.mkdirSync(serverLegal,{recursive:true});
+   fs.writeFileSync(path.join(out,name),html);
+   fs.writeFileSync(path.join(serverLegal,name),html);
+ }
  const visible=decode(r.body.replace(/<[^>]*>/g,''));assert.equal(normalize(visible),normalize(r.text),'Body text differs: '+file);
  const placeholders=[...new Set(md.match(/请发布方[^\n|。]+/g)??[])];
  manifest.documents.push({source:file,html:name,source_sha256:hash(md),html_sha256:hash(html),body_text_equal:true,placeholders});
