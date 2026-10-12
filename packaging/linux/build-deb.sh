@@ -8,7 +8,7 @@ ARCH=${3:?Debian architecture is required}
 APP_NAME=xy-encrypt-app
 VERSION=1.3.1-1
 PACKAGE_ROOT="${OUTPUT_DIR}/${APP_NAME}-${ARCH}-pkg"
-DEB_PATH="${OUTPUT_DIR}/XY加密-Linux-${ARCH}.deb"
+DEB_PATH="${OUTPUT_DIR}/XY加密-linux-${ARCH}.deb"
 
 rm -rf "${PACKAGE_ROOT}" "${DEB_PATH}"
 mkdir -p \

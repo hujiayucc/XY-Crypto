@@ -39,16 +39,16 @@ jobs:
         include:
           - abi: arm32
             flutter_arch: arm
-            artifact: XY加密-Android-armeabi-v7a
+            artifact: XY加密-android-armeabi-v7a
           - abi: arm64
             flutter_arch: arm64
-            artifact: XY加密-Android-arm64-v8a
+            artifact: XY加密-android-arm64-v8a
           - abi: x86_64
             flutter_arch: x64
-            artifact: XY加密-Android-x86_64
+            artifact: XY加密-android-x86_64
           - abi: all
             flutter_arch: all
-            artifact: XY加密-Android-all
+            artifact: XY加密-android-all
     steps:
       - uses: actions/checkout@v4
       - uses: subosito/flutter-action@v2
@@ -178,7 +178,7 @@ jobs:
           $bundle = "build/windows/${{ matrix.flutter_arch }}/runner/Release"
           if (!(Test-Path $bundle)) { throw "Windows bundle not found: $bundle" }
           New-Item -ItemType Directory -Force -Path ci-dist | Out-Null
-          Compress-Archive -Path "$bundle\*" -DestinationPath "ci-dist/XY加密-Windows-${{ matrix.arch }}.zip" -Force
+          Compress-Archive -Path "$bundle\*" -DestinationPath "ci-dist/XY加密-windows-${{ matrix.arch }}.zip" -Force
       - name: Build setup.exe
         shell: pwsh
         run: |
@@ -196,10 +196,10 @@ jobs:
           WINDOWS_SIGNING_CERTIFICATE_PASSWORD: ${{ secrets.WINDOWS_SIGNING_CERTIFICATE_PASSWORD }}
           WINDOWS_SIGNING_TIMESTAMP_URL: ${{ vars.WINDOWS_SIGNING_TIMESTAMP_URL }}
           WINDOWS_SIGNING_ALLOW_UNTRUSTED: 'true'
-        run: pwsh -File tool/sign_windows.ps1 "${{ github.workspace }}\ci-dist\XY加密-Windows-${{ matrix.arch }}.exe"
+        run: pwsh -File tool/sign_windows.ps1 "${{ github.workspace }}\ci-dist\XY加密-windows-${{ matrix.arch }}.exe"
       - uses: actions/upload-artifact@v4
         with:
-          name: XY加密-Windows-${{ matrix.arch }}
+          name: XY加密-windows-${{ matrix.arch }}
           path: ci-dist/*
 
   linux:
@@ -263,7 +263,7 @@ jobs:
           APP_VERSION="${{ env.APP_VERSION }}" bash packaging/linux/build-packages.sh "$bundle" ci-dist "${{ matrix.deb_arch }}"
       - uses: actions/upload-artifact@v4
         with:
-          name: XY加密-Linux-${{ matrix.arch }}
+          name: XY加密-linux-${{ matrix.arch }}
           path: ci-dist/*
 
   apple:
@@ -292,7 +292,7 @@ jobs:
           IOS_CODE_SIGN_IDENTITY: ${{ vars.IOS_CODE_SIGN_IDENTITY }}
         run: |
           if [ -z "$IOS_CERTIFICATE_BASE64" ] && [ -z "$IOS_PROVISIONING_PROFILE_BASE64" ]; then
-            echo 'iOS signing materials are absent; producing the unsigned archive.'
+            echo 'iOS signing materials are absent; producing a locally ad-hoc signed IPA archive.'
             echo 'enabled=false' >> "$GITHUB_OUTPUT"
             exit 0
           fi
@@ -318,6 +318,7 @@ jobs:
             echo "ios_ipa_path=$ipa_path" >> "$GITHUB_OUTPUT"
           else
             flutter build ios --release --no-codesign --no-pub
+            bash tool/self_sign_ios.sh build/ios/iphoneos/Runner.app
           fi
       - name: Build macOS archive
         run: flutter build macos --release --no-pub

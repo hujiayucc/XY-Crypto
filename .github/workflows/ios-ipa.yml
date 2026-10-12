@@ -2,16 +2,6 @@ name: XY Crypto iOS IPA
 
 on:
   workflow_dispatch:
-    inputs:
-      export_method:
-        description: Apple export method; use development for a free Personal Team
-        required: true
-        default: development
-        type: choice
-        options:
-          - development
-          - ad-hoc
-          - app-store
 
 permissions:
   contents: read
@@ -21,7 +11,7 @@ env:
 
 jobs:
   build:
-    name: Build signed iOS IPA
+    name: Build iOS IPA archive
     runs-on: macos-14
     steps:
       - uses: actions/checkout@v4
@@ -32,25 +22,25 @@ jobs:
           cache: true
       - run: node tool/build_legal_site.cjs
       - run: flutter pub get
-      - name: Configure Apple signing
+      - name: Build unsigned iOS app
+        run: flutter build ios --release --no-codesign --no-pub
+      - name: Apply local ad-hoc signature
+        run: bash tool/self_sign_ios.sh build/ios/iphoneos/Runner.app
+      - name: Package IPA archive
         shell: bash
-        env:
-          IOS_CERTIFICATE_BASE64: ${{ secrets.IOS_CERTIFICATE_BASE64 }}
-          IOS_CERTIFICATE_PASSWORD: ${{ secrets.IOS_CERTIFICATE_PASSWORD }}
-          IOS_PROVISIONING_PROFILE_BASE64: ${{ secrets.IOS_PROVISIONING_PROFILE_BASE64 }}
-          IOS_BUNDLE_ID: ${{ vars.IOS_BUNDLE_ID }}
-          IOS_TEAM_ID: ${{ vars.IOS_TEAM_ID }}
-          IOS_EXPORT_METHOD: ${{ inputs.export_method }}
-          IOS_CODE_SIGN_IDENTITY: ${{ vars.IOS_CODE_SIGN_IDENTITY }}
-        run: bash tool/configure_ios_signing.sh
-      - name: Build IPA
-        run: flutter build ipa --release --no-pub --export-options-plist=ios/ExportOptions.plist
+        run: |
+          set -euo pipefail
+          rm -rf ci-dist
+          mkdir -p ci-dist/Payload
+          cp -R build/ios/iphoneos/*.app ci-dist/Payload/
+          (cd ci-dist && zip -qry XY加密-ios-arm64.ipa Payload)
+          rm -rf ci-dist/Payload
       - name: Verify and name IPA
         id: package
         shell: bash
         run: |
           set -euo pipefail
-          ipa_path="$(find build/ios/ipa -maxdepth 1 -name '*.ipa' -print -quit)"
+          ipa_path="$(find ci-dist -maxdepth 1 -name '*.ipa' -print -quit)"
           if [ -z "$ipa_path" ]; then
             echo 'No IPA was produced.' >&2
             exit 1
@@ -72,11 +62,12 @@ jobs:
               exit 1
               ;;
           esac
-          codesign --verify --deep --strict --verbose=2 "$app_path"
-          ipa_name="XY加密-iOS-${label}.ipa"
+          echo 'Local ad-hoc IPA; Apple provisioning is not included.'
+          codesign --verify --deep --strict "$app_path"
+          ipa_name="XY加密-ios-${label}.ipa"
           cp "$ipa_path" "$ipa_name"
           echo "ipa_name=$ipa_name" >> "$GITHUB_OUTPUT"
-          echo "Verified signed IPA: $ipa_name"
+          echo "Verified local ad-hoc IPA: $ipa_name"
       - uses: actions/upload-artifact@v4
         with:
           name: ${{ steps.package.outputs.ipa_name }}

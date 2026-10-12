@@ -79,9 +79,13 @@ Future<ScanSource?> showScanDisclosure(BuildContext context) =>
 
 Future<String?> scanText(BuildContext context) async {
   if (Platform.isWindows || Platform.isLinux) return pickQrImage();
-  final source = await showScanDisclosure(context);
-  if (!context.mounted || source == null) return null;
-  if (source == ScanSource.image) return pickQrImage();
+  final hasPermission = await PrivacyRuntime.hasCameraPermission();
+  if (!context.mounted) return null;
+  if (!hasPermission) {
+    final source = await showScanDisclosure(context);
+    if (!context.mounted || source == null) return null;
+    if (source == ScanSource.image) return pickQrImage();
+  }
   final permission = await PrivacyRuntime.prepareScanner();
   if (!context.mounted) return null;
   if (permission != 'ready') {

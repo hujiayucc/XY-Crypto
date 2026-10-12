@@ -30,20 +30,26 @@ ios_executable=$(/usr/libexec/PlistBuddy -c 'Print :CFBundleExecutable' "${ios_a
 mac_executable=$(/usr/libexec/PlistBuddy -c 'Print :CFBundleExecutable' "${mac_app}/Contents/Info.plist")
 ios_arch=$(architecture_label "${ios_app}/${ios_executable}")
 mac_arch=$(architecture_label "${mac_app}/Contents/MacOS/${mac_executable}")
-ios_name="XY加密-iOS-${ios_arch}"
-macos_name="XY加密-macOS-${mac_arch}"
+ios_name="XY加密-ios-${ios_arch}"
+macos_name="XY加密-macos-${mac_arch}"
 
 if [ -n "${IOS_IPA_PATH:-}" ]; then
   if [ ! -f "${IOS_IPA_PATH}" ]; then
-    echo "Signed iOS IPA not found: ${IOS_IPA_PATH}" >&2
+    echo "iOS IPA not found: ${IOS_IPA_PATH}" >&2
     exit 1
   fi
   cp "${IOS_IPA_PATH}" "${OUTPUT_DIR}/${ios_name}.ipa"
-  ios_file="${ios_name}.ipa"
 else
-  tar -C "$(dirname "${ios_app}")" -czf "${OUTPUT_DIR}/${ios_name}.tar.gz" "$(basename "${ios_app}")"
-  ios_file="${ios_name}.tar.gz"
+  # This creates an IPA-shaped archive without Apple signing.
+  # Device installation still requires Apple-issued signing and provisioning.
+  ipa_stage="${OUTPUT_DIR}/.ipa-stage"
+  rm -rf "${ipa_stage}"
+  mkdir -p "${ipa_stage}/Payload"
+  cp -R "${ios_app}" "${ipa_stage}/Payload/"
+  (cd "${ipa_stage}" && zip -qry "../${ios_name}.ipa" Payload)
+  rm -rf "${ipa_stage}"
 fi
+ios_file="${ios_name}.ipa"
 ditto -c -k --sequesterRsrc --keepParent "${mac_app}" "${OUTPUT_DIR}/${macos_name}.zip"
 
 if [ -n "${GITHUB_OUTPUT:-}" ]; then

@@ -74,6 +74,8 @@ class MainActivity : FlutterActivity() {
                         scannerResult = null
                         result.success(null)
                     }
+                    "hasCameraPermission" -> result.success(
+                        checkSelfPermission(Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED)
                     "prepareScanner" -> prepareScanner(result)
                     "openAppSettings" -> {
                         startActivity(Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS,

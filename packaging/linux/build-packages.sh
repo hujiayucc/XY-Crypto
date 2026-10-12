@@ -47,9 +47,9 @@ done
 
 # Generic archives contain the runnable Flutter bundle directly.
 tar -C "$(dirname "${BUNDLE_DIR}")" -czf \
-  "${OUTPUT_DIR}/XY加密-Linux-${ARCH}.tar.gz" "$(basename "${BUNDLE_DIR}")"
+  "${OUTPUT_DIR}/XY加密-linux-${ARCH}.tar.gz" "$(basename "${BUNDLE_DIR}")"
 tar -C "$(dirname "${BUNDLE_DIR}")" -cJf \
-  "${OUTPUT_DIR}/XY加密-Linux-${ARCH}.tar.xz" "$(basename "${BUNDLE_DIR}")"
+  "${OUTPUT_DIR}/XY加密-linux-${ARCH}.tar.xz" "$(basename "${BUNDLE_DIR}")"
 
 # Debian-family package.
 bash packaging/linux/build-deb.sh "${BUNDLE_DIR}" "${OUTPUT_DIR}" "${ARCH}"
@@ -93,7 +93,7 @@ cp -a %{_sourcedir}/root/. %{buildroot}/
 EOF
 rpmbuild --define "_topdir ${RPM_ROOT}" --target "${RPM_ARCH}" \
   -bb "${RPM_ROOT}/SPECS/${APP_NAME}.spec" >/dev/null
-cp "${RPM_ROOT}/RPMS/${RPM_ARCH}/"*.rpm "${OUTPUT_DIR}/XY加密-Linux-${ARCH}.rpm"
+cp "${RPM_ROOT}/RPMS/${RPM_ARCH}/"*.rpm "${OUTPUT_DIR}/XY加密-linux-${ARCH}.rpm"
 
 # Arch-family package. This is a valid pacman package archive with a standard .PKGINFO.
 ARCH_ROOT="${OUTPUT_DIR}/${APP_NAME}-arch-root"
@@ -117,7 +117,7 @@ depend = glib2
 depend = libsecret
 EOF
 tar --zstd -C "${ARCH_ROOT}" -cf \
-  "${OUTPUT_DIR}/XY加密-Linux-${ARCH}.pkg.tar.zst" .
+  "${OUTPUT_DIR}/XY加密-linux-${ARCH}.pkg.tar.zst" .
 rm -rf "${ARCH_ROOT}"
 
 printf '%s\n' "Created Linux packages for ${ARCH}"

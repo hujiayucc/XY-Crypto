@@ -66,6 +66,10 @@ class PrivacyRuntime {
     }
   }
 
+  static Future<bool> hasCameraPermission() async {
+    return await channel.invokeMethod<bool>('hasCameraPermission') ?? false;
+  }
+
   static Future<String> prepareScanner() async {
     if (!Platform.isAndroid) return 'ready';
     return await channel.invokeMethod<String>('prepareScanner') ?? 'denied';
