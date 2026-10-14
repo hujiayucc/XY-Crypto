@@ -99,6 +99,10 @@ class HomeController extends ChangeNotifier {
       setImportedText(text);
       return true;
     }
+    return importSharedText(imported);
+  }
+
+  Future<bool> importSharedText(SharedText imported) async {
     _mode = imported.mode;
     _input = imported.text;
     _output = '';
