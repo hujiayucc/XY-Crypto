@@ -37,10 +37,11 @@ final initial =
           initial.trim().isNotEmpty) {
         await onText(initial);
       }
-      final file = await _channel.invokeMethod<Map<dynamic, dynamic>>(
-          'getInitialSharedFile');
-      if (_active && generation == _generation && file != null) {
-        await onFile?.call(Map<String, Object?>.from(file));
+      if (onFile != null) {
+        final file = await _channel.invokeMethod<dynamic>('getInitialSharedFile');
+        if (_active && generation == _generation && file is Map) {
+          await onFile!.call(Map<String, Object?>.from(file));
+        }
       }
     } on MissingPluginException {
       // Apple platforms use app_links instead of this native channel.
