@@ -34,6 +34,10 @@ Root: HKCU; Subkey: "Software\Classes\xyd"; ValueType: string; ValueName: ""; Va
 Root: HKCU; Subkey: "Software\Classes\xyd"; ValueType: string; ValueName: "URL Protocol"; ValueData: ""
 Root: HKCU; Subkey: "Software\Classes\xyd\DefaultIcon"; ValueType: string; ValueName: ""; ValueData: """{app}\xy_encrypt_app.exe"",0"
 Root: HKCU; Subkey: "Software\Classes\xyd\shell\open\command"; ValueType: string; ValueName: ""; ValueData: """{app}\xy_encrypt_app.exe"" ""%1"""
+Root: HKCU; Subkey: "Software\Classes\.xyshare"; ValueType: string; ValueName: ""; ValueData: "XYEncryptShareFile"; Flags: uninsdeletevalue
+Root: HKCU; Subkey: "Software\Classes\XYEncryptShareFile"; ValueType: string; ValueName: ""; ValueData: "XY加密分享文件"; Flags: uninsdeletekey
+Root: HKCU; Subkey: "Software\Classes\XYEncryptShareFile\DefaultIcon"; ValueType: string; ValueName: ""; ValueData: """{app}\xy_encrypt_app.exe"",0"
+Root: HKCU; Subkey: "Software\Classes\XYEncryptShareFile\shell\open\command"; ValueType: string; ValueName: ""; ValueData: """{app}\xy_encrypt_app.exe"" ""%1"""
 
 [Files]
 Source: "{#BuildDir}\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs

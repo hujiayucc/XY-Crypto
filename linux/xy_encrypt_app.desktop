@@ -6,5 +6,5 @@ Exec=xy_encrypt_app %u
 Icon=com.hujiayucc.decode
 Terminal=false
 Categories=Utility;
-MimeType=x-scheme-handler/xyd;
+MimeType=x-scheme-handler/xyd;application/x-xyshare;
 StartupWMClass=com.hujiayucc.decode

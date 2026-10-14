@@ -3,13 +3,15 @@ import 'dart:async';
 import 'package:flutter/services.dart';
 
 typedef IncomingShareHandler = FutureOr<void> Function(String text);
+typedef IncomingFileHandler = FutureOr<void> Function(Map<String, Object?> file);
 
 /// Consumes pending OS content only when started after privacy consent.
 class IncomingShareService {
-  IncomingShareService({required this.onText});
+  IncomingShareService({required this.onText, this.onFile});
 
   static const _channel = MethodChannel('com.hujiayucc.decode/share');
   final IncomingShareHandler onText;
+  final IncomingFileHandler? onFile;
   bool _active = false;
   int _generation = 0;
 
@@ -18,22 +20,27 @@ class IncomingShareService {
     _active = true;
     final generation = ++_generation;
     _channel.setMethodCallHandler((call) async {
-      if (_active &&
-          generation == _generation &&
-          call.method == 'sharedText' &&
-          call.arguments is String) {
+      if (!_active || generation != _generation) return null;
+      if (call.method == 'sharedText' && call.arguments is String) {
         await onText(call.arguments as String);
+      } else if (call.method == 'sharedFile' && call.arguments is Map) {
+        await onFile?.call(Map<String, Object?>.from(call.arguments as Map));
       }
       return null;
     });
     try {
-      final initial =
+final initial =
           await _channel.invokeMethod<String>('getInitialSharedText');
       if (_active &&
           generation == _generation &&
           initial != null &&
           initial.trim().isNotEmpty) {
         await onText(initial);
+      }
+      final file = await _channel.invokeMethod<Map<dynamic, dynamic>>(
+          'getInitialSharedFile');
+      if (_active && generation == _generation && file != null) {
+        await onFile?.call(Map<String, Object?>.from(file));
       }
     } on MissingPluginException {
       // Apple platforms use app_links instead of this native channel.

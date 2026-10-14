@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:io';
+import 'dart:typed_data';
 import 'package:app_links/app_links.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -52,7 +53,10 @@ class _XyAppState extends State<XyApp> {
   @override
   void initState() {
     super.initState();
-    _incomingShare = IncomingShareService(onText: _importText);
+    _incomingShare = IncomingShareService(
+      onText: _importText,
+      onFile: _importShareFile,
+    );
     if (!_privacy.android) {
       // Keep raw OS events in memory until consent; parse/import them afterwards.
       _listenExternalLinks();
@@ -122,18 +126,47 @@ class _XyAppState extends State<XyApp> {
       unawaited(_incomingShare.start());
       return;
     }
+    if (Platform.isIOS) {
+      unawaited(_readAppleFile());
+    }
     final pending = _pendingExternalLink;
     _pendingExternalLink = null;
-    if (pending != null) unawaited(_importExternalLink(pending));
+    if (pending != null) {
+      if (pending.trim().toLowerCase().startsWith('file:') ||
+          (!pending.contains('://') && pending.toLowerCase().endsWith('.xyshare'))) {
+        unawaited(_importExternalFile(pending));
+      } else {
+        unawaited(_importExternalLink(pending));
+      }
+    }
+  }
+
+  Future<void> _readAppleFile() async {
+    const channel = MethodChannel('com.hujiayucc.decode/file');
+    try {
+      final file = await channel.invokeMethod<Map<dynamic, dynamic>>('getInitialFile');
+      if (file != null) await _importShareFile(Map<String, Object?>.from(file));
+    } on PlatformException {
+      _message('分享文件读取失败');
+    } on MissingPluginException {
+      // Desktop and Android use their own file association paths.
+    }
   }
 
   void _listenExternalLinks() {
     _links ??= AppLinks();
-    // The stream supplies both the initial link and subsequent activations.
-    // Calling getInitialLink as well can replay an old URI over a newer one.
+    // Desktop file associations arrive through the same app_links stream as
+    // URL schemes. Keep the raw value pending until privacy consent exists.
     _subscription = _links!.stringLinkStream.listen(
       (raw) {
-        if (!_legalAccepted) {
+        if (raw.trim().toLowerCase().startsWith('file:') ||
+            (!raw.contains('://') && raw.toLowerCase().endsWith('.xyshare'))) {
+          if (_legalAccepted) {
+            unawaited(_importExternalFile(raw));
+          } else {
+            _pendingExternalLink = raw;
+          }
+        } else if (!_legalAccepted) {
           _pendingExternalLink = raw;
         } else {
           unawaited(_importExternalLink(raw));
@@ -143,6 +176,44 @@ class _XyAppState extends State<XyApp> {
         if (mounted && _legalAccepted) _message('链接监听未就绪');
       },
     );
+  }
+
+  Future<void> _importShareFile(Map<String, Object?> file) async {
+    if (!mounted || !_legalAccepted) return;
+    final name = file['name'];
+    final value = file['bytes'];
+    if (name is! String || !name.toLowerCase().endsWith('.xyshare')) {
+      _message('文件类型不受支持');
+      return;
+    }
+    if (value is! Uint8List || value.isEmpty || value.length > ShareFileCodec.maxFileBytes) {
+      _message('分享文件为空或超过 32 MB');
+      return;
+    }
+    final epoch = _consentEpoch;
+    try {
+      final shared = ShareFileCodec.decode(value);
+      _navigator.currentState?.popUntil((route) => route.isFirst);
+      await _controller.importSharedText(shared);
+      if (!mounted || !_legalAccepted || epoch != _consentEpoch) return;
+      _splashTimer?.cancel();
+      if (_showSplash) {
+        if (Platform.isAndroid || Platform.isIOS) {
+          unawaited(SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge));
+        }
+        setState(() => _showSplash = false);
+      }
+      _navigator.currentState?.popUntil((route) => route.isFirst);
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted && _legalAccepted && epoch == _consentEpoch) {
+          _message(_controller.statusMessage ?? '分享文件已导入');
+        }
+      });
+    } on FormatException catch (error) {
+      _message(error.message);
+    } catch (_) {
+      _message('分享文件导入失败');
+    }
   }
 
   void _message(String text) {
@@ -161,6 +232,28 @@ class _XyAppState extends State<XyApp> {
 
   Future<void> _importExternalLink(String text) =>
       _enqueueImport(text, uriOnly: true);
+
+  Future<void> _importExternalFile(String raw) async {
+    if (!mounted || !_legalAccepted) return;
+    try {
+      final uri = raw.startsWith('file:') ? Uri.parse(raw) : Uri.file(raw);
+      final path = uri.toFilePath();
+      final file = File(path);
+      final name = path.split(Platform.pathSeparator).last;
+      if (!name.toLowerCase().endsWith('.xyshare')) {
+        _message('文件类型不受支持');
+        return;
+      }
+      final length = await file.length();
+      if (length <= 0 || length > ShareFileCodec.maxFileBytes) {
+        _message('分享文件为空或超过 32 MB');
+        return;
+      }
+      await _importShareFile({'name': name, 'bytes': await file.readAsBytes()});
+    } catch (_) {
+      _message('分享文件读取失败');
+    }
+  }
 
   Future<void> _importText(String text) => _enqueueImport(text,
       uriOnly: text.trim().toLowerCase().startsWith('xyd:'));

@@ -7,7 +7,9 @@ import android.net.Uri
 import android.os.Handler
 import android.os.Looper
 import android.os.Process
+import android.provider.OpenableColumns
 import android.provider.Settings
+import java.io.ByteArrayOutputStream
 import com.google.mlkit.common.MlKit
 
 import io.flutter.embedding.android.FlutterActivity
@@ -22,12 +24,13 @@ class MainActivity : FlutterActivity() {
         private const val POLICY_VERSION = "xy-legal-v2"
         private const val CAMERA_REQUEST = 701
         private const val DENIAL_INTERVAL = 48L * 60 * 60 * 1000
+        private const val MAX_SHARE_FILE_BYTES = 32 * 1024 * 1024
     }
     private val preferences by lazy { getSharedPreferences("xy_privacy", MODE_PRIVATE) }
     private var engine: FlutterEngine? = null
     private var shareChannel: MethodChannel? = null
-    private var active = false
-    private var receiving = false
+    @Volatile private var active = false
+    @Volatile private var receiving = false
     private var pluginsRegistered = false
     private var scannerResult: MethodChannel.Result? = null
 
@@ -43,6 +46,17 @@ class MainActivity : FlutterActivity() {
                     else {
                         receiving = true
                         result.success(consumeIntent())
+                    }
+                }
+                "getInitialSharedFile" -> {
+                    if (!active) result.error("consent_required", "请先同意隐私政策", null)
+                    else {
+                        val source = takeFileIntent()
+                        if (source == null) result.success(null)
+                        else Thread {
+                            val content = readShareFile(source)
+                            runOnUiThread { result.success(if (active) content else null) }
+                        }.start()
                     }
                 }
                 "stopReceiving" -> { receiving = false; result.success(null) }
@@ -166,11 +180,24 @@ class MainActivity : FlutterActivity() {
         // Keep the OS Intent opaque until consent; no extras or URI are read.
         if (!active) return
         super.onNewIntent(intent)
-        if (receiving) consumeIntent()?.let { shareChannel?.invokeMethod("sharedText", it) }
+        if (receiving) {
+            consumeIntent()?.let { shareChannel?.invokeMethod("sharedText", it) }
+            takeFileIntent()?.let { source ->
+                Thread {
+                    val content = readShareFile(source)
+                    if (active && receiving && content != null) {
+                        runOnUiThread {
+                            if (active && receiving) shareChannel?.invokeMethod("sharedFile", content)
+                        }
+                    }
+                }.start()
+            }
+        }
     }
     private fun consumeIntent(): String? {
         if (!active) return null
         val source = intent ?: return null
+        if (isPotentialShareFileIntent(source)) return null
         val value = when (source.action) {
             Intent.ACTION_VIEW -> source.dataString
             Intent.ACTION_SEND -> source.getCharSequenceExtra(Intent.EXTRA_TEXT)?.toString()
@@ -180,5 +207,75 @@ class MainActivity : FlutterActivity() {
         }
         intent = Intent(Intent.ACTION_MAIN)
         return value?.trim()?.takeIf { it.isNotEmpty() }
+    }
+
+    private fun fileUri(source: Intent): Uri? = when (source.action) {
+        Intent.ACTION_VIEW -> source.data?.takeIf {
+            it.scheme == "content" || it.scheme == "file"
+        }
+        Intent.ACTION_SEND -> {
+            @Suppress("DEPRECATION")
+            (source.getParcelableExtra(Intent.EXTRA_STREAM) as? Uri)
+                ?: source.clipData?.takeIf { it.itemCount > 0 }?.getItemAt(0)?.uri
+        }
+        else -> null
+    }
+
+    private fun displayName(uri: Uri): String? {
+        if (uri.scheme == "file") return uri.lastPathSegment
+        contentResolver.query(uri, arrayOf(OpenableColumns.DISPLAY_NAME), null, null, null)?.use { cursor ->
+            if (cursor.moveToFirst()) {
+                val index = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME)
+                if (index >= 0) return cursor.getString(index)
+            }
+        }
+        return uri.lastPathSegment
+    }
+
+    private fun isPotentialShareFileIntent(source: Intent): Boolean {
+        val uri = fileUri(source) ?: return false
+        val mime = source.type?.substringBefore(';')?.trim()?.lowercase().orEmpty()
+        return when (source.action) {
+            Intent.ACTION_VIEW -> uri.scheme == "content" || uri.scheme == "file"
+            Intent.ACTION_SEND -> uri.scheme == "content" &&
+                mime in setOf("application/x-xyshare", "application/octet-stream")
+            else -> false
+        }
+    }
+
+    private fun takeFileIntent(): Intent? {
+        if (!active) return null
+        val source = intent ?: return null
+        if (!isPotentialShareFileIntent(source)) return null
+        intent = Intent(Intent.ACTION_MAIN)
+        return source
+    }
+
+    private fun readShareFile(source: Intent): Map<String, Any>? {
+        val uri = fileUri(source) ?: return null
+        return try {
+            val name = displayName(uri) ?: return null
+            if (!name.trim().lowercase().endsWith(".xyshare")) return null
+            val bytes = (if (uri.scheme == "file") {
+                java.io.FileInputStream(java.io.File(uri.path!!))
+            } else {
+                contentResolver.openInputStream(uri)
+            })?.use { input ->
+                val output = ByteArrayOutputStream()
+                val buffer = ByteArray(8192)
+                var total = 0
+                while (true) {
+                    val count = input.read(buffer)
+                    if (count < 0) break
+                    total += count
+                    if (total > MAX_SHARE_FILE_BYTES) return null
+                    output.write(buffer, 0, count)
+                }
+                output.toByteArray()
+            } ?: return null
+            mapOf("name" to name, "bytes" to bytes)
+        } catch (_: Exception) {
+            null
+        }
     }
 }

@@ -34,6 +34,35 @@
 	<string>扫描二维码，将文本导入加密工具。</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>选择二维码图片并导入识别到的文本。</string>
+	<key>CFBundleDocumentTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleTypeName</key>
+			<string>XY加密分享文件</string>
+			<key>CFBundleTypeRole</key>
+			<string>Viewer</string>
+			<key>LSItemContentTypes</key>
+			<array><string>com.hujiayucc.decode.xyshare</string></array>
+		</dict>
+	</array>
+	<key>UTExportedTypeDeclarations</key>
+	<array>
+		<dict>
+			<key>UTTypeIdentifier</key>
+			<string>com.hujiayucc.decode.xyshare</string>
+			<key>UTTypeDescription</key>
+			<string>XY加密分享文件</string>
+			<key>UTTypeConformsTo</key>
+			<array><string>public.data</string></array>
+			<key>UTTypeTagSpecification</key>
+			<dict>
+				<key>public.filename-extension</key>
+				<array><string>xyshare</string></array>
+				<key>public.mime-type</key>
+				<string>application/x-xyshare</string>
+			</dict>
+		</dict>
+	</array>
 	<key>CFBundleURLTypes</key>
 	<array>
 		<dict>
