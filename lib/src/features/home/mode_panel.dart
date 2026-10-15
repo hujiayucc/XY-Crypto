@@ -6,6 +6,7 @@ class ModePanel extends StatelessWidget {
   const ModePanel({
     super.key,
     required this.mode,
+    this.encodingLabel,
     required this.wide,
     required this.onAlgorithm,
     required this.onEncoding,
@@ -13,6 +14,7 @@ class ModePanel extends StatelessWidget {
   });
 
   final CryptoMode mode;
+  final String? encodingLabel;
   final bool wide;
   final VoidCallback? onAlgorithm;
   final VoidCallback? onEncoding;
@@ -29,7 +31,7 @@ class ModePanel extends StatelessWidget {
     final encoding = _choiceButton(
       context,
       label: '编码方式',
-      value: mode.formatLabel,
+      value: encodingLabel ?? mode.formatLabel,
       onTap: onEncoding,
     );
     final keyState = mode.needsKey ? _KeyStateChip(onTap: onKey) : null;

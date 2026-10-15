@@ -269,8 +269,25 @@ class _LegalConsentDialogState extends State<LegalConsentDialog> {
     });
     try {
       await widget.onAccept();
+    } on PlatformException catch (error) {
+      if (!mounted) return;
+      final details = error.details;
+      final diagnostic = details is Map
+          ? [details['plugin'], details['exception']]
+              .whereType<String>()
+              .where((value) => value.isNotEmpty)
+              .join('/')
+          : '';
+      final suffix = diagnostic.isEmpty ? '' : ' [$diagnostic]';
+      final message = switch (error.code) {
+        'consent_activation_failed' =>
+          '确认记录已保存，但应用组件初始化失败，请重试（${error.code}$suffix）',
+        'consent_save_failed' => '保存确认记录失败，请重试（${error.code}$suffix）',
+        _ => '确认过程失败，请重试（${error.code}$suffix）',
+      };
+      setState(() => _error = message);
     } catch (_) {
-      if (mounted) setState(() => _error = '保存确认记录失败，请重试');
+      if (mounted) setState(() => _error = '确认过程失败，请重试');
     } finally {
       if (mounted) setState(() => _saving = false);
     }

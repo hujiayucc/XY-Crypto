@@ -23,7 +23,7 @@ import '../legal/legal_consent.dart';
 import '../legal/privacy_center.dart';
 import 'share_qr_dialog.dart';
 
-enum _ShareAction { system, copyLink, qr }
+enum _ShareAction { system, copyLink, qr, file }
 
 class _ShareOptions {
   const _ShareOptions({required this.includeKey});
@@ -207,6 +207,10 @@ class _HomePageState extends State<HomePage> {
                         onPressed: () => _menu('pasteShare'),
                         child: const Text('从剪贴板导入分享链接'),
                       ),
+                      MenuItemButton(
+                        onPressed: _pickFile,
+                        child: const Text('导入文本或 .xyshare 文件'),
+                      ),
                     ],
                     child: const Text('导入'),
                   ),
@@ -281,6 +285,7 @@ class _HomePageState extends State<HomePage> {
   }) {
     final modePanel = ModePanel(
       mode: model.mode,
+      encodingLabel: _encodingLabel(_choiceForMode(model.mode), model.mode),
       wide: wide,
       onAlgorithm: model.busy ? null : _chooseAlgorithm,
       onEncoding: model.busy ? null : _chooseEncoding,
@@ -365,6 +370,29 @@ class _HomePageState extends State<HomePage> {
         (choice) => choice.label == mode.algorithmLabel,
       );
 
+  // Keep historic mode IDs decodable; collapse equivalent byte renderings
+  // only in the encoding selector. GB18030 currently uses the GBK codec.
+  List<CryptoMode> _visibleEncodingModes(CryptoAlgorithmChoice choice) {
+    if (choice.label == '编码转换') {
+      // The GB18030-labelled legacy entry calls the same GBK codec.
+      return choice.modes
+          .where((mode) => mode != CryptoMode.gb18030Bytes)
+          .toList();
+    }
+    var seenByte = false;
+    return choice.modes.where((mode) {
+      if (!mode.formatLabel.startsWith('Byte[ ]')) return true;
+      if (seenByte) return false;
+      seenByte = true;
+      return true;
+    }).toList();
+  }
+
+  String _encodingLabel(CryptoAlgorithmChoice choice, CryptoMode mode) =>
+      choice.label != '编码转换' && mode.formatLabel.startsWith('Byte[ ]')
+          ? 'Byte[ ]'
+          : mode.formatLabel;
+
   Future<void> _chooseAlgorithm() async {
     FocusScope.of(context).unfocus();
     final currentChoice = _choiceForMode(model.mode);
@@ -400,9 +428,10 @@ class _HomePageState extends State<HomePage> {
     );
     if (!mounted || choice == null) return;
 
-    var nextMode = choice.modes.first;
-    for (final mode in choice.modes) {
-      if (mode.formatLabel == model.mode.formatLabel) {
+    var nextMode = _visibleEncodingModes(choice).first;
+    for (final mode in _visibleEncodingModes(choice)) {
+      if (_encodingLabel(choice, mode) ==
+          _encodingLabel(currentChoice, model.mode)) {
         nextMode = mode;
         break;
       }
@@ -424,12 +453,16 @@ class _HomePageState extends State<HomePage> {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                for (final mode in choice.modes)
+                for (final mode in _visibleEncodingModes(choice))
                   ListTile(
-                    selected: mode == currentMode,
-                    title: Text(mode.formatLabel),
-                    trailing:
-                        mode == currentMode ? const Icon(Icons.check) : null,
+                    selected: mode == currentMode ||
+                        _encodingLabel(choice, mode) ==
+                            _encodingLabel(choice, currentMode),
+                    title: Text(_encodingLabel(choice, mode)),
+                    trailing: _encodingLabel(choice, mode) ==
+                            _encodingLabel(choice, currentMode)
+                        ? const Icon(Icons.check)
+                        : null,
                     onTap: () => Navigator.pop(dialogContext, mode),
                   ),
               ],
@@ -501,16 +534,28 @@ class _HomePageState extends State<HomePage> {
 
   Future<void> _pickFile() async {
     try {
-      final files = await FilePicker.platform.pickFiles(withData: true);
-      if (files == null) return;
+      final files = await FilePicker.platform.pickFiles(withData: false);
+      if (files == null || !mounted) return;
       final file = files.files.single;
+      if (file.size > ShareFileCodec.maxFileBytes) {
+        throw const FormatException('文件超过 32 MB');
+      }
       final bytes = file.bytes ??
           (file.path == null ? null : await File(file.path!).readAsBytes());
       if (bytes == null || !mounted) return;
-      model.input = utf8.decode(
-          bytes); // report invalid text rather than silently replace bytes
+      if (bytes.length > ShareFileCodec.maxFileBytes) {
+        throw const FormatException('文件超过 32 MB');
+      }
+      if (file.name.toLowerCase().endsWith(ShareFileCodec.extension)) {
+        await model.importSharedText(ShareFileCodec.decode(bytes));
+        if (mounted) _message(model.statusMessage ?? '分享文件已导入');
+      } else {
+        model.input = utf8.decode(bytes);
+      }
+    } on FormatException catch (error) {
+      if (mounted) _message(error.message);
     } catch (error) {
-      _message('文本读取失败：$error');
+      if (mounted) _message('文件读取失败：$error');
     }
   }
 
@@ -539,57 +584,110 @@ class _HomePageState extends State<HomePage> {
     }
     final shareOptions = await _askShareOptions();
     if (!mounted || shareOptions == null) return;
-    late final Uri uri;
-    late final Uri webUri;
+    final mode = model.shareMode;
+    final text = model.shareText;
+    final operation =
+        model.shareIsEncrypted ? ShareCodec.encryptOperation : null;
+    final key = shareOptions.includeKey && model.shareIsEncrypted
+        ? model.shareKey
+        : null;
+    Uri? webUri;
+    String? linkError;
     try {
-      uri = ShareCodec.encode(
-        model.shareMode,
-        model.shareText,
-        operation: model.shareIsEncrypted ? ShareCodec.encryptOperation : null,
-        key: shareOptions.includeKey && model.shareIsEncrypted
-            ? model.shareKey
-            : null,
-      );
+      final uri = ShareCodec.encode(mode, text, operation: operation, key: key);
       webUri = ShareCodec.encodeWebUrl(uri);
     } on FormatException catch (error) {
-      _message(error.message);
-      return;
+      linkError = error.message;
     }
+    final link = webUri;
     final action = await showModalBottomSheet<_ShareAction>(
       context: context,
       builder: (sheetContext) => SafeArea(
         child: Column(mainAxisSize: MainAxisSize.min, children: [
+          if (linkError != null)
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+              child: Text('$linkError，请选择分享文件'),
+            ),
           ListTile(
+            enabled: link != null,
             leading: const Icon(Icons.ios_share_outlined),
             title: const Text('系统分享'),
             subtitle: Text(
               shareOptions.includeKey ? '包含密钥的可导入链接' : '不包含密钥',
             ),
-            onTap: () => Navigator.pop(sheetContext, _ShareAction.system),
+            onTap: link == null
+                ? null
+                : () => Navigator.pop(sheetContext, _ShareAction.system),
           ),
           ListTile(
+            enabled: link != null,
             leading: const Icon(Icons.link),
             title: const Text('复制链接'),
             subtitle: const Text('复制网站分享链接'),
-            onTap: () => Navigator.pop(sheetContext, _ShareAction.copyLink),
+            onTap: link == null
+                ? null
+                : () => Navigator.pop(sheetContext, _ShareAction.copyLink),
           ),
           ListTile(
+            enabled: link != null,
             leading: const Icon(Icons.qr_code_2),
             title: const Text('二维码'),
             subtitle: const Text('使用扫一扫导入'),
-            onTap: () => Navigator.pop(sheetContext, _ShareAction.qr),
+            onTap: link == null
+                ? null
+                : () => Navigator.pop(sheetContext, _ShareAction.qr),
+          ),
+          ListTile(
+            leading: const Icon(Icons.insert_drive_file_outlined),
+            title: const Text('分享文件'),
+            subtitle: const Text('适合超长内容，生成 .xyshare 文件'),
+            onTap: () => Navigator.pop(sheetContext, _ShareAction.file),
           ),
         ]),
       ),
     );
     if (!mounted || action == null) return;
+    if (action == _ShareAction.file) {
+      await _shareFile(mode, text, operation: operation, key: key);
+      return;
+    }
+    if (link == null) return;
     switch (action) {
       case _ShareAction.system:
-        await _shareSystem(webUri);
+        await _shareSystem(link);
       case _ShareAction.copyLink:
-        await _copyShareLink(webUri);
+        await _copyShareLink(link);
       case _ShareAction.qr:
-        await _showShareQr(webUri);
+        await _showShareQr(link);
+      case _ShareAction.file:
+        break;
+    }
+  }
+
+  Future<void> _shareFile(CryptoMode mode, String text,
+      {String? operation, String? key}) async {
+    final box = context.findRenderObject() as RenderBox?;
+    try {
+      final bytes =
+          ShareFileCodec.encode(mode, text, operation: operation, key: key);
+      await Share.shareXFiles(
+        [
+          XFile.fromData(
+            Uint8List.fromList(bytes),
+            mimeType: ShareFileCodec.mimeType,
+            name: ShareFileCodec.fileName,
+          ),
+        ],
+        fileNameOverrides: const [ShareFileCodec.fileName],
+        subject: 'XY加密文件分享',
+        sharePositionOrigin:
+            box == null ? null : box.localToGlobal(Offset.zero) & box.size,
+      );
+    } on FormatException catch (error) {
+      if (mounted) _message(error.message);
+    } catch (error) {
+      if (mounted) _message('分享文件失败：$error');
     }
   }
 

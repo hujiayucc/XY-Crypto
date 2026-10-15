@@ -96,8 +96,22 @@ class _XyAppState extends State<XyApp> {
   }
 
   Future<void> _acceptLegal() async {
-    await _privacy.accept(legalConsentVersion);
-    await _privacy.activate(legalConsentVersion);
+    try {
+      await _privacy.accept(legalConsentVersion);
+    } on MissingPluginException {
+      throw PlatformException(
+        code: 'consent_save_failed',
+        message: 'privacy_channel_missing',
+      );
+    }
+    try {
+      await _privacy.activate(legalConsentVersion);
+    } on MissingPluginException {
+      throw PlatformException(
+        code: 'consent_activation_failed',
+        message: 'privacy_channel_missing',
+      );
+    }
     if (!mounted) return;
     setState(() => _legalAccepted = true);
     _startIncomingServices();
@@ -132,7 +146,8 @@ class _XyAppState extends State<XyApp> {
     _pendingExternalLink = null;
     if (pending != null) {
       if (pending.trim().toLowerCase().startsWith('file:') ||
-          (!pending.contains('://') && pending.toLowerCase().endsWith('.xyshare'))) {
+          (!pending.contains('://') &&
+              pending.toLowerCase().endsWith('.xyshare'))) {
         unawaited(_importExternalFile(pending));
       } else {
         unawaited(_importExternalLink(pending));
@@ -143,7 +158,8 @@ class _XyAppState extends State<XyApp> {
   Future<void> _readAppleFile() async {
     const channel = MethodChannel('com.hujiayucc.decode/file');
     try {
-      final file = await channel.invokeMethod<Map<dynamic, dynamic>>('getInitialFile');
+      final file =
+          await channel.invokeMethod<Map<dynamic, dynamic>>('getInitialFile');
       if (file != null) await _importShareFile(Map<String, Object?>.from(file));
     } on PlatformException {
       _message('分享文件读取失败');
@@ -185,7 +201,9 @@ class _XyAppState extends State<XyApp> {
       _message('文件类型不受支持');
       return;
     }
-    if (value is! Uint8List || value.isEmpty || value.length > ShareFileCodec.maxFileBytes) {
+    if (value is! Uint8List ||
+        value.isEmpty ||
+        value.length > ShareFileCodec.maxFileBytes) {
       _message('分享文件为空或超过 32 MB');
       return;
     }
@@ -198,7 +216,8 @@ class _XyAppState extends State<XyApp> {
       _splashTimer?.cancel();
       if (_showSplash) {
         if (Platform.isAndroid || Platform.isIOS) {
-          unawaited(SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge));
+          unawaited(
+              SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge));
         }
         setState(() => _showSplash = false);
       }

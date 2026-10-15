@@ -9,6 +9,7 @@ import android.os.Looper
 import android.os.Process
 import android.provider.OpenableColumns
 import android.provider.Settings
+import android.util.Log
 import java.io.ByteArrayOutputStream
 import com.google.mlkit.common.MlKit
 
@@ -108,8 +109,23 @@ class MainActivity : FlutterActivity() {
                     }
                     else -> result.notImplemented()
                 }
-            } catch (_: Exception) {
-                result.error("privacy_operation_failed", "操作未完成，请重试", null)
+            } catch (error: Exception) {
+                val code = when (call.method) {
+                    "saveConsent" -> "consent_save_failed"
+                    "activate" -> "consent_activation_failed"
+                    else -> "privacy_operation_failed"
+                }
+                val rootCause = error.cause ?: error
+                val details = mutableMapOf<String, String>(
+                    "stage" to call.method,
+                    "exception" to rootCause.javaClass.simpleName
+                )
+                if (error is PluginRegistrationException) {
+                    details["plugin"] = error.plugin
+                }
+                // Do not log consent records, keys, shared text, or file contents.
+                Log.e("XYPrivacy", "${call.method}: ${details["plugin"] ?: "native"}/${rootCause.javaClass.simpleName}")
+                result.error(code, "操作未完成，请重试", details)
             }
         }
     }
@@ -119,18 +135,55 @@ class MainActivity : FlutterActivity() {
             record.optString("acceptedAt").matches(Regex("\\d{4}-\\d{2}-\\d{2}T.+Z"))
     } catch (_: Exception) { false }
 
+    private class PluginRegistrationException(
+        val plugin: String,
+        cause: Exception
+    ) : IllegalStateException("Plugin registration failed: $plugin", cause)
+
+    private fun addApprovedPlugin(
+        flutterEngine: FlutterEngine,
+        name: String,
+        pluginClass: Class<out io.flutter.embedding.engine.plugins.FlutterPlugin>,
+        create: () -> io.flutter.embedding.engine.plugins.FlutterPlugin
+    ) {
+        if (flutterEngine.plugins.has(pluginClass)) return
+        try {
+            flutterEngine.plugins.add(create())
+        } catch (error: Exception) {
+            throw PluginRegistrationException(name, error)
+        }
+    }
+
     private fun registerApprovedPlugins(flutterEngine: FlutterEngine) {
         if (pluginsRegistered) return
-        val plugins = flutterEngine.plugins
-        // Android VIEW and text shares use our own channel, avoiding app_links'
-        // pre-consent Intent parsing and debug URL logging.
-        plugins.add(com.it_nomads.fluttersecurestorage.FlutterSecureStoragePlugin())
-        plugins.add(io.flutter.plugins.flutter_plugin_android_lifecycle.FlutterAndroidLifecyclePlugin())
-        plugins.add(com.mr.flutter.plugin.filepicker.FilePickerPlugin())
-        plugins.add(io.flutter.plugins.pathprovider.PathProviderPlugin())
-        plugins.add(dev.fluttercommunity.plus.share.SharePlusPlugin())
-        plugins.add(io.flutter.plugins.urllauncher.UrlLauncherPlugin())
-        plugins.add(io.flutter.plugins.webviewflutter.WebViewFlutterPlugin())
+        addApprovedPlugin(flutterEngine, "flutter_secure_storage",
+            com.it_nomads.fluttersecurestorage.FlutterSecureStoragePlugin::class.java) {
+            com.it_nomads.fluttersecurestorage.FlutterSecureStoragePlugin()
+        }
+        addApprovedPlugin(flutterEngine, "flutter_plugin_android_lifecycle",
+            io.flutter.plugins.flutter_plugin_android_lifecycle.FlutterAndroidLifecyclePlugin::class.java) {
+            io.flutter.plugins.flutter_plugin_android_lifecycle.FlutterAndroidLifecyclePlugin()
+        }
+        addApprovedPlugin(flutterEngine, "file_picker",
+            com.mr.flutter.plugin.filepicker.FilePickerPlugin::class.java) {
+            com.mr.flutter.plugin.filepicker.FilePickerPlugin()
+        }
+        addApprovedPlugin(flutterEngine, "path_provider",
+            io.flutter.plugins.pathprovider.PathProviderPlugin::class.java) {
+            io.flutter.plugins.pathprovider.PathProviderPlugin()
+        }
+        addApprovedPlugin(flutterEngine, "share_plus",
+            dev.fluttercommunity.plus.share.SharePlusPlugin::class.java) {
+            dev.fluttercommunity.plus.share.SharePlusPlugin()
+        }
+        addApprovedPlugin(flutterEngine, "url_launcher",
+            io.flutter.plugins.urllauncher.UrlLauncherPlugin::class.java) {
+            io.flutter.plugins.urllauncher.UrlLauncherPlugin()
+        }
+        addApprovedPlugin(flutterEngine, "webview_flutter",
+            io.flutter.plugins.webviewflutter.WebViewFlutterPlugin::class.java) {
+            io.flutter.plugins.webviewflutter.WebViewFlutterPlugin()
+        }
         pluginsRegistered = true
     }
     private fun prepareScanner(result: MethodChannel.Result) {
