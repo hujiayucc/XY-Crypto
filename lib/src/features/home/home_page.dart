@@ -370,28 +370,17 @@ class _HomePageState extends State<HomePage> {
         (choice) => choice.label == mode.algorithmLabel,
       );
 
-  // Keep historic mode IDs decodable; collapse equivalent byte renderings
-  // only in the encoding selector. GB18030 currently uses the GBK codec.
+  // Keep historic mode IDs decodable. Only exact duplicate labels are merged;
+  // distinct byte encodings (GB18030/GBK/UTF-8) remain selectable.
   List<CryptoMode> _visibleEncodingModes(CryptoAlgorithmChoice choice) {
-    if (choice.label == '编码转换') {
-      // The GB18030-labelled legacy entry calls the same GBK codec.
-      return choice.modes
-          .where((mode) => mode != CryptoMode.gb18030Bytes)
-          .toList();
-    }
-    var seenByte = false;
-    return choice.modes.where((mode) {
-      if (!mode.formatLabel.startsWith('Byte[ ]')) return true;
-      if (seenByte) return false;
-      seenByte = true;
-      return true;
-    }).toList();
+    final seenLabels = <String>{};
+    return choice.modes
+        .where((mode) => seenLabels.add(mode.formatLabel))
+        .toList();
   }
 
   String _encodingLabel(CryptoAlgorithmChoice choice, CryptoMode mode) =>
-      choice.label != '编码转换' && mode.formatLabel.startsWith('Byte[ ]')
-          ? 'Byte[ ]'
-          : mode.formatLabel;
+      mode.formatLabel;
 
   Future<void> _chooseAlgorithm() async {
     FocusScope.of(context).unfocus();
