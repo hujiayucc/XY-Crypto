@@ -8,5 +8,9 @@ services:
       PORT: 8787
       RELEASE_REPO: ${RELEASE_REPO:-}
       GITHUB_TOKEN: ${GITHUB_TOKEN:-}
-      RELEASE_MANIFEST: ${RELEASE_MANIFEST:-}
+      RELEASE_MANIFEST: /app/release.json
+      PREVIEW_MANIFEST: /app/preview.json
+    volumes:
+      - "${RELEASE_JSON_PATH:-./release.json}:/app/release.json:ro"
+      - "${PREVIEW_JSON_PATH:-./preview.json}:/app/preview.json:ro"
     restart: unless-stopped

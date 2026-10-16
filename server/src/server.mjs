@@ -15,6 +15,7 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(__dirname, '..');
 const PUBLIC_DIR = path.join(ROOT, 'public');
 const DEFAULT_MANIFEST = process.env.RELEASE_MANIFEST || '';
+const PREVIEW_MANIFEST = process.env.PREVIEW_MANIFEST || '';
 const REPO = process.env.RELEASE_REPO || '';
 const TOKEN = process.env.GITHUB_TOKEN || '';
 const PORT = Number(process.env.PORT || 8787);
@@ -65,6 +66,7 @@ async function getReleaseData() {
   if (releaseCache && releaseCache.expiresAt > now) return releaseCache.value;
   const value = await loadReleases({
     manifestPath: DEFAULT_MANIFEST || undefined,
+    previewManifestPath: PREVIEW_MANIFEST || undefined,
     repo: REPO || undefined,
     token: TOKEN || undefined,
   });
@@ -91,7 +93,7 @@ async function handleApi(req, res, url) {
     return sendJson(res, 200, {
       ok: true,
       service: 'xy-encrypt-server',
-      releaseSource: DEFAULT_MANIFEST ? 'manifest' : REPO ? 'github' : 'unconfigured',
+      releaseSource: DEFAULT_MANIFEST || PREVIEW_MANIFEST ? 'manifest' : REPO ? 'github' : 'unconfigured',
     });
   }
   if (url.pathname === '/api/releases') {

@@ -1,10 +1,14 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import fs from 'node:fs/promises';
+import os from 'node:os';
+import path from 'node:path';
 import {
   compareVersions,
   filterAssets,
   isUpdateAvailable,
   latestRelease,
+  loadReleases,
   normalizeRelease,
   parseAssetName,
 } from '../src/releases.mjs';
@@ -34,6 +38,27 @@ test('sorts stable and preview semver correctly', () => {
     normalizeRelease({ tag_name: 'v1.4.0', assets: [] }),
   ];
   assert.equal(latestRelease(releases, 'stable').version, '1.4.0');
+  assert.equal(latestRelease(releases, 'preview').version, '1.4.0-preview.1');
+});
+
+test('loads stable and preview releases from separate manifests', async (t) => {
+  const directory = await fs.mkdtemp(path.join(os.tmpdir(), 'xy-release-manifests-'));
+  t.after(() => fs.rm(directory, { recursive: true, force: true }));
+  const stablePath = path.join(directory, 'release.json');
+  const previewPath = path.join(directory, 'preview.json');
+  await fs.writeFile(stablePath, JSON.stringify({ releases: [
+    { version: '1.3.2', build: 181, assets: [] },
+  ] }));
+  await fs.writeFile(previewPath, JSON.stringify({ releases: [
+    { version: '1.4.0-preview.1', build: 182, assets: [] },
+  ] }));
+
+  const { releases, source } = await loadReleases({
+    manifestPath: stablePath,
+    previewManifestPath: previewPath,
+  });
+  assert.equal(source, 'manifest');
+  assert.equal(latestRelease(releases, 'stable').version, '1.3.2');
   assert.equal(latestRelease(releases, 'preview').version, '1.4.0-preview.1');
 });
 

@@ -124,12 +124,14 @@ export function isUpdateAvailable(currentVersion, currentBuild, release) {
   return release.build > Number(currentBuild);
 }
 
-export async function readManifest(manifestPath) {
+export async function readManifest(manifestPath, { forcePrerelease = false } = {}) {
   const raw = await fs.readFile(manifestPath, 'utf8');
   const parsed = JSON.parse(raw);
   const entries = Array.isArray(parsed) ? parsed : parsed.releases;
   if (!Array.isArray(entries)) throw new Error('发布清单格式无效');
-  return entries.map(normalizeRelease).filter(Boolean);
+  return entries
+    .map((entry) => normalizeRelease(forcePrerelease ? { ...entry, prerelease: true } : entry))
+    .filter(Boolean);
 }
 
 async function readGitHubReleases(repo, token, fetchImpl = fetch) {
@@ -148,8 +150,14 @@ async function readGitHubReleases(repo, token, fetchImpl = fetch) {
     .filter(Boolean);
 }
 
-export async function loadReleases({ manifestPath, repo, token, fetchImpl } = {}) {
-  if (manifestPath) return { releases: await readManifest(manifestPath), source: 'manifest' };
+export async function loadReleases({ manifestPath, previewManifestPath, repo, token, fetchImpl } = {}) {
+  if (manifestPath || previewManifestPath) {
+    const [stable, preview] = await Promise.all([
+      manifestPath ? readManifest(manifestPath) : [],
+      previewManifestPath ? readManifest(previewManifestPath, { forcePrerelease: true }) : [],
+    ]);
+    return { releases: [...stable, ...preview], source: 'manifest' };
+  }
   if (repo) return { releases: await readGitHubReleases(repo, token, fetchImpl), source: 'github' };
   return { releases: [], source: 'unconfigured' };
 }
