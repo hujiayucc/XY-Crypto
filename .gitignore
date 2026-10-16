@@ -41,7 +41,15 @@ windows/flutter/generated_plugin_registrant.*
 # Local logs and stale checksum snapshots
 *.log
 SHA256SUMS.txt
+*.apk
+*.apk.sha256
 packages/*/pubspec.lock
+
+# Local repair, reverse-engineering, and assistant build artifacts
+repair_checks/
+repair_backup_*/
+.backup/
+repair_share_release.py
 
 # Generated validation output and historical reverse-engineering evidence
 docs/evidence/
