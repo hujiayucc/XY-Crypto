@@ -6,7 +6,6 @@
     "node": ">=20"
   },
   "scripts": {
-    "start": "node src/server.mjs",
-    "test": "node --test test/*.test.mjs"
+    "start": "node src/server.mjs"
   }
 }

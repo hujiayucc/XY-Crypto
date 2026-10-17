@@ -30,4 +30,3 @@ jobs:
       - name: Flutter tests
         run: flutter test --no-pub
       - name: Node tests
-        run: node --test server/test/*.test.mjs

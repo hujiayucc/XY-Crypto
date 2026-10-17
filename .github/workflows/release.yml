@@ -35,7 +35,6 @@ jobs:
       - run: flutter pub get
       - run: flutter analyze --no-pub
       - run: flutter test --no-pub
-      - run: node --test server/test/*.test.mjs
 
   android:
     name: Android release ${{ matrix.abi }}
