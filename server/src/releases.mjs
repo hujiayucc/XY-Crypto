@@ -1,6 +1,6 @@
 import fs from 'node:fs/promises';
 
-const ASSET_RE = /^XY加密-(Android|Windows|Linux|iOS|macOS)-(.+)\.(apk|exe|zip|deb|rpm|pkg\.tar\.zst|tar\.gz|tar\.xz|dmg|ipa)$/i;
+const ASSET_RE = /^XY加密-(Android|Windows|Linux)-(.+)\.(apk|exe|zip|deb|rpm|pkg\.tar\.zst|tar\.gz|tar\.xz|dmg|ipa)$/i;
 const VERSION_RE = /^v?(\d+)\.(\d+)\.(\d+)(?:-([0-9A-Za-z.-]+))?$/;
 
 export function parseVersion(value) {
@@ -55,8 +55,6 @@ export function normalizePlatform(value) {
   if (normalized === 'android') return 'android';
   if (normalized === 'windows' || normalized === 'win') return 'windows';
   if (normalized === 'linux') return 'linux';
-  if (normalized === 'ios') return 'ios';
-  if (normalized === 'macos' || normalized === 'mac') return 'macos';
   return normalized;
 }
 

@@ -24,7 +24,7 @@ XY加密（Android 包名 com.hujiayucc.decode）提供本机文本编码、摘�
 
 输入、结果和本次密钥通常在会话内存中处理。密钥输入默认不记住；用户主动勾选后写入本机平台安全存储。再次取消勾选只影响本次保存，已有密钥需通过“清除本机已保存密钥”删除。密钥槽位按算法家族共用，加密可读取此前保存的对应密钥，解密操作仍由用户确认输入。
 
-安全存储的保护能力依赖平台和锁屏配置，不保证丢失密钥恢复或物理内存安全擦除。Android 关闭系统自动备份开关；设备迁移、第三方备份及 Apple Keychain 的保留行为仍受系统机制影响。
+安全存储的保护能力依赖平台和锁屏配置，不保证丢失密钥恢复或物理内存安全擦除。Android 关闭系统自动备份开关；设备迁移、第三方备份及系统安全存储的保留行为仍受系统机制影响。
 
 ## 4. 敏感内容与对外提供
 
@@ -108,10 +108,10 @@ Google 隐私政策及联系：https://policies.google.com/privacy
 
 | 组件与实际版本 | 开发者/维护者、来源与政策 | 功能、处理信息、触发条件 |
 |---|---|---|
-| mobile_scanner 6.0.11 | Julian Steenbakker / 开源贡献者；https://pub.dev/packages/mobile_scanner | 相机扫码桥接。Android 为 ML Kit + CameraX；iOS/macOS 为 AVFoundation/Vision。处理相机画面及二维码结果，仅选择相机后运行 |
+| mobile_scanner 6.0.11 | Julian Steenbakker / 开源贡献者；https://pub.dev/packages/mobile_scanner | 相机扫码桥接。Android 使用 ML Kit + CameraX，桌面端使用对应系统相机能力。处理相机画面及二维码结果，仅选择相机后运行 |
 | Google ML Kit barcode-scanning 17.3.0、common 18.11.0（捆绑模型） | Google LLC；https://developers.google.cn/ml-kit/android-data-disclosure?hl=zh-cn；https://policies.google.com/privacy | 图像本地识别；SDK 诊断信息见共享清单。Android 移除 MlKitInitProvider 自动初始化，用户确认扫码说明和相机授权后初始化 |
 | AndroidX CameraX camera-lifecycle / camera-camera2 1.5.0 | Google / Android Open Source Project；https://developer.android.com/jetpack/androidx/releases/camera | 相机设备、预览、图像帧和生命周期；用户启用相机时调用，非账户或广告 SDK |
-| flutter_secure_storage 9.2.4 | German Saprykin / 项目维护者；https://pub.dev/packages/flutter_secure_storage | 平台安全存储。处理用户选择保存的密码/JSON 密钥；Apple/桌面还存同意记录。未配置向作者发送内容 |
+| flutter_secure_storage 9.2.4 | German Saprykin / 项目维护者；https://pub.dev/packages/flutter_secure_storage | 平台安全存储。处理用户选择保存的密码/JSON 密钥；桌面还存同意记录。未配置向作者发送内容 |
 | file_picker 8.3.7 | Miguel Ruivo / 项目维护者；https://pub.dev/packages/file_picker | 用户选择文件和二维码图片后，读取内容、名称、路径/URI，可产生私有临时缓存；未配置向作者上传 |
 | share_plus 10.1.4 | Flutter Community / Plus Plugins 维护者；https://pub.dev/packages/share_plus | 主动分享文本及链接，交给系统和用户选择的应用；不由插件作者接收这些内容 |
 | url_launcher 6.3.2；Android 6.3.29 | Flutter 项目作者；https://pub.dev/packages/url_launcher | 打开用户指定的外部地址；目标应用/网站按各自规则处理请求 |
@@ -132,15 +132,15 @@ Android 未同意前仅运行应用界面、离线政策和本地同意记录读
 
 | 权限或能力 | 用途、申请时机 | 拒绝/撤回后的影响 |
 |---|---|---|
-| Android CAMERA；Apple 相机用途说明 | 用户选择相机识别并阅读提示后申请，仅用于二维码识别，不录音、不录制视频 | 相机扫码暂停；可选择图片识别、输入文本及继续本地加解密。Android 拒绝后 48 小时内不重复弹系统申请，可主动到系统设置修改 |
+| Android CAMERA；桌面端按系统权限机制申请相机 | 用户选择相机识别并阅读提示后申请，仅用于二维码识别，不录音、不录制视频 | 相机扫码暂停；可选择图片识别、输入文本及继续本地加解密。Android 拒绝后 48 小时内不重复弹系统申请，可主动到系统设置修改 |
 | Android INTERNET（普通权限） | 用户主动访问网页，以及启用 ML Kit 后的 SDK 诊断通信；非启动广告或账户登录 | 系统若限制网络，本地算法与图片二维码处理仍可使用；网页或 SDK 网络请求受影响 |
 | Android ACCESS_NETWORK_STATE（间接依赖普通权限） | 依赖组件判断网络连接状态，非定位或读取 Wi-Fi 名称的用途 | 不作为本地算法的使用条件 |
 | 应用自定义 DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION | AndroidX 动态接收器的签名级保护 | 不向用户申请、非联系人/短信/定位权限 |
-| 系统文件/照片选择器 | 只读取用户选择的文件或图片；Apple 在需要时展示照片用途 | 取消选择后返回原页面，不批量遍历媒体文件；不申请所有文件访问 |
+| 系统文件/照片选择器 | 只读取用户选择的文件或图片；系统按需展示文件或照片用途 | 取消选择后返回原页面，不批量遍历媒体文件；不申请所有文件访问 |
 | 剪贴板 | 点击剪贴板导入或系统粘贴时读取；点击复制时写入 | 未主动操作不轮询；系统关闭读取时仍可手动输入 |
 
 ## 管理路径
 
-首页菜单 → 隐私中心 → 系统权限管理（3 次操作到系统设置入口），再按系统界面选择相机等权限。iOS/macOS 在系统“隐私与安全”中管理；不同设备的设置名称可能不同。
+首页菜单 → 隐私中心 → 系统权限管理（3 次操作到系统设置入口），再按系统界面选择相机等权限。桌面系统按各自的系统设置管理；不同设备的设置名称可能不同。
 
 应用没有短信、电话、通讯录、位置、录音、后台定位或广告标识权限用途。正式签名包的最终合并清单仍应逐项核查，不将开发包的检查替代发行包验收。

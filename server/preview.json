@@ -1,0 +1,21 @@
+{
+  "releases": [
+    {
+      "version": "1.4.0-preview.1",
+      "build": 182,
+      "name": "XY加密 1.4.0 Preview 1",
+      "html_url": "https://github.com/hujiayucc/XY-Crypto/releases/tag/preview-1.4.0-preview.1",
+      "prerelease": true,
+      "notes": "Preview 版本更新说明",
+      "publishedAt": "2026-10-20T00:00:00Z",
+      "assets": [
+        {
+          "name": "XY加密-Android-arm64-v8a.apk",
+          "browser_download_url": "https://github.com/hujiayucc/XY-Crypto/releases/download/preview-1.4.0-preview.1/XY加密-Android-arm64-v8a.apk",
+          "state": "uploaded",
+          "size": 0
+        }
+      ]
+    }
+  ]
+}

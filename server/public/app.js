@@ -1,4 +1,4 @@
-const platformNames = { android: 'Android', windows: 'Windows', linux: 'Linux', ios: 'iOS', macos: 'macOS' };
+const platformNames = { android: 'Android', windows: 'Windows', linux: 'Linux' };
 let activeChannel = 'stable';
 
 function escapeHtml(value) {

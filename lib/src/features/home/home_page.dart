@@ -222,11 +222,10 @@ class _HomePageState extends State<HomePage> {
                     onPressed: () => _menu('privacyCenter'),
                     child: const Text('隐私中心'),
                   ),
-                  if (!Platform.isIOS)
-                    MenuItemButton(
-                      onPressed: () => _menu('exit'),
-                      child: const Text('退出'),
-                    ),
+                  MenuItemButton(
+                    onPressed: () => _menu('exit'),
+                    child: const Text('退出'),
+                  ),
                 ],
                 builder: (context, controller, child) => IconButton(
                   tooltip: '更多',
@@ -772,11 +771,7 @@ class _HomePageState extends State<HomePage> {
             ? 'windows'
             : Platform.isLinux
                 ? 'linux'
-                : Platform.isIOS
-                    ? 'ios'
-                    : Platform.isMacOS
-                        ? 'macos'
-                        : '';
+                : '';
     final query = <String, String>{
       'channel': 'stable',
       'version': _appVersion,

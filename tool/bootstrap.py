@@ -16,7 +16,7 @@ def main():
     if not flutter:
         raise SystemExit('Install Flutter SDK and add flutter to PATH first.')
     root = Path(__file__).resolve().parents[1]
-    platforms = ('android','ios','windows','linux','macos')
+    platforms = ('android','windows','linux')
     with tempfile.TemporaryDirectory(prefix='xy_runners_') as temp:
         staged = Path(temp)/'xy_encrypt_app'
         subprocess.run([flutter,'create','--project-name=xy_encrypt_app',

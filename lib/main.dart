@@ -63,7 +63,7 @@ class _XyAppState extends State<XyApp> {
     _loadLegalConsent();
     _splashTimer = Timer(_splashDuration, () {
       if (!mounted) return;
-      if (Platform.isAndroid || Platform.isIOS) {
+      if (Platform.isAndroid) {
         SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
       }
       setState(() => _showSplash = false);
@@ -139,9 +139,6 @@ class _XyAppState extends State<XyApp> {
       unawaited(_incomingShare.start());
       return;
     }
-    if (Platform.isIOS) {
-      unawaited(_readAppleFile());
-    }
     final pending = _pendingExternalLink;
     _pendingExternalLink = null;
     if (pending != null) {
@@ -152,19 +149,6 @@ class _XyAppState extends State<XyApp> {
       } else {
         unawaited(_importExternalLink(pending));
       }
-    }
-  }
-
-  Future<void> _readAppleFile() async {
-    const channel = MethodChannel('com.hujiayucc.decode/file');
-    try {
-      final file =
-          await channel.invokeMethod<Map<dynamic, dynamic>>('getInitialFile');
-      if (file != null) await _importShareFile(Map<String, Object?>.from(file));
-    } on PlatformException {
-      _message('分享文件读取失败');
-    } on MissingPluginException {
-      // Desktop and Android use their own file association paths.
     }
   }
 
@@ -215,7 +199,7 @@ class _XyAppState extends State<XyApp> {
       if (!mounted || !_legalAccepted || epoch != _consentEpoch) return;
       _splashTimer?.cancel();
       if (_showSplash) {
-        if (Platform.isAndroid || Platform.isIOS) {
+        if (Platform.isAndroid) {
           unawaited(
               SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge));
         }
@@ -310,7 +294,7 @@ class _XyAppState extends State<XyApp> {
       }
       _splashTimer?.cancel();
       if (_showSplash) {
-        if (Platform.isAndroid || Platform.isIOS) {
+        if (Platform.isAndroid) {
           unawaited(
               SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge));
         }

@@ -1,13 +1,13 @@
 # XY加密
 
-Flutter 五端文本编码与加解密工具，支持 Android、iOS、macOS、Windows 和 Linux。应用身份统一为“XY加密”，平台标识为 `com.hujiayucc.decode`，版本为 `1.3.1 (180)`。
+Flutter 三端文本编码与加解密工具，支持 Android、Windows 和 Linux。应用身份统一为“XY加密”，平台标识为 `com.hujiayucc.decode`，版本为 `1.3.1 (180)`。
 
 ## 目录
 
 - `lib/`：Flutter 应用与共享业务逻辑。
 - `packages/xy_crypto/`：共享算法包。
 - `assets/`：法律文档、Emoji 和表情资源。
-- `android/`、`ios/`、`macos/`、`windows/`、`linux/`：五端原生工程。
+- `android/`、`windows/`、`linux/`：三端原生工程。
 - `test/`：算法、分享协议和界面测试。
 - `tool/build_legal_site.cjs`：从法律 Markdown 生成运行时 HTML。
 - `.github/workflows/`：代码检查、Preview 和正式 Release 工作流。

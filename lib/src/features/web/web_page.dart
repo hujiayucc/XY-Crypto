@@ -17,7 +17,7 @@ class _WebPageState extends State<WebPage> {
   int _progress = 100;
   String? _error;
   bool get _embedded =>
-      Platform.isAndroid || Platform.isIOS || Platform.isMacOS;
+      Platform.isAndroid;
 
   @override
   void initState() {

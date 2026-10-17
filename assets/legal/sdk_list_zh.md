@@ -10,10 +10,10 @@
 
 | 组件与实际版本 | 开发者/维护者、来源与政策 | 功能、处理信息、触发条件 |
 |---|---|---|
-| mobile_scanner 6.0.11 | Julian Steenbakker / 开源贡献者；https://pub.dev/packages/mobile_scanner | 相机扫码桥接。Android 为 ML Kit + CameraX；iOS/macOS 为 AVFoundation/Vision。处理相机画面及二维码结果，仅选择相机后运行 |
+| mobile_scanner 6.0.11 | Julian Steenbakker / 开源贡献者；https://pub.dev/packages/mobile_scanner | 相机扫码桥接。Android 为 ML Kit + CameraX；桌面端使用系统相机能力。处理相机画面及二维码结果，仅选择相机后运行 |
 | Google ML Kit barcode-scanning 17.3.0、common 18.11.0（捆绑模型） | Google LLC；https://developers.google.cn/ml-kit/android-data-disclosure?hl=zh-cn；https://policies.google.com/privacy | 图像本地识别；SDK 诊断信息见共享清单。Android 移除 MlKitInitProvider 自动初始化，用户确认扫码说明和相机授权后初始化 |
 | AndroidX CameraX camera-lifecycle / camera-camera2 1.5.0 | Google / Android Open Source Project；https://developer.android.com/jetpack/androidx/releases/camera | 相机设备、预览、图像帧和生命周期；用户启用相机时调用，非账户或广告 SDK |
-| flutter_secure_storage 9.2.4 | German Saprykin / 项目维护者；https://pub.dev/packages/flutter_secure_storage | 平台安全存储。处理用户选择保存的密码/JSON 密钥；Apple/桌面还存同意记录。未配置向作者发送内容 |
+| flutter_secure_storage 9.2.4 | German Saprykin / 项目维护者；https://pub.dev/packages/flutter_secure_storage | 平台安全存储。处理用户选择保存的密码/JSON 密钥；桌面还存同意记录。未配置向作者发送内容 |
 | file_picker 8.3.7 | Miguel Ruivo / 项目维护者；https://pub.dev/packages/file_picker | 用户选择文件和二维码图片后，读取内容、名称、路径/URI，可产生私有临时缓存；未配置向作者上传 |
 | share_plus 10.1.4 | Flutter Community / Plus Plugins 维护者；https://pub.dev/packages/share_plus | 主动分享文本及链接，交给系统和用户选择的应用；不由插件作者接收这些内容 |
 | url_launcher 6.3.2；Android 6.3.29 | Flutter 项目作者；https://pub.dev/packages/url_launcher | 打开用户指定的外部地址；目标应用/网站按各自规则处理请求 |
