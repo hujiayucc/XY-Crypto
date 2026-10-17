@@ -29,4 +29,3 @@ jobs:
         run: flutter analyze --no-pub
       - name: Flutter tests
         run: flutter test --no-pub
-      - name: Node tests
