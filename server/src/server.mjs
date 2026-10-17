@@ -14,10 +14,8 @@ import {
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(__dirname, '..');
 const PUBLIC_DIR = path.join(ROOT, 'public');
-const DEFAULT_MANIFEST = process.env.RELEASE_MANIFEST || '';
-const PREVIEW_MANIFEST = process.env.PREVIEW_MANIFEST || '';
-const REPO = process.env.RELEASE_REPO || '';
-const TOKEN = process.env.GITHUB_TOKEN || '';
+export const RELEASE_MANIFEST_PATH = '/app/release.json';
+export const PREVIEW_MANIFEST_PATH = '/app/preview.json';
 const PORT = Number(process.env.PORT || 8787);
 const HOST = process.env.HOST || '127.0.0.1';
 const CACHE_MS = 60_000;
@@ -65,10 +63,8 @@ async function getReleaseData() {
   const now = Date.now();
   if (releaseCache && releaseCache.expiresAt > now) return releaseCache.value;
   const value = await loadReleases({
-    manifestPath: DEFAULT_MANIFEST || undefined,
-    previewManifestPath: PREVIEW_MANIFEST || undefined,
-    repo: REPO || undefined,
-    token: TOKEN || undefined,
+    manifestPath: RELEASE_MANIFEST_PATH,
+    previewManifestPath: PREVIEW_MANIFEST_PATH,
   });
   releaseCache = { expiresAt: now + CACHE_MS, value };
   return value;
@@ -93,7 +89,7 @@ async function handleApi(req, res, url) {
     return sendJson(res, 200, {
       ok: true,
       service: 'xy-encrypt-server',
-      releaseSource: DEFAULT_MANIFEST || PREVIEW_MANIFEST ? 'manifest' : REPO ? 'github' : 'unconfigured',
+      releaseSource: 'manifest',
     });
   }
   if (url.pathname === '/api/releases') {
